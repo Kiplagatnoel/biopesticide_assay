@@ -1,0 +1,337 @@
+Plant,Trt,Rep,Time,N_control,N_treated
+Untreated control,Untreated control,1,1hr,0,10
+Untreated control,Untreated control,2,1hr,0,10
+Untreated control,Untreated control,3,1hr,0,10
+Untreated control,Untreated control,4,1hr,0,10
+Untreated control,Untreated control,1,2hr,0,10
+Untreated control,Untreated control,2,2hr,0,10
+Untreated control,Untreated control,3,2hr,0,10
+Untreated control,Untreated control,4,2hr,0,10
+Untreated control,Untreated control,1,3hr,0,10
+Untreated control,Untreated control,2,3hr,0,10
+Untreated control,Untreated control,3,3hr,0,10
+Untreated control,Untreated control,4,3hr,0,10
+Untreated control,Untreated control,1,4hr,0,10
+Untreated control,Untreated control,2,4hr,0,10
+Untreated control,Untreated control,3,4hr,0,10
+Untreated control,Untreated control,4,4hr,0,10
+Untreated control,Untreated control,1,5hr,0,10
+Untreated control,Untreated control,2,5hr,0,10
+Untreated control,Untreated control,3,5hr,0,10
+Untreated control,Untreated control,4,5hr,0,10
+Untreated control,Untreated control,1,6hr,0,10
+Untreated control,Untreated control,2,6hr,0,10
+Untreated control,Untreated control,3,6hr,0,10
+Untreated control,Untreated control,4,6hr,0,10
+Solvent control,Solvent control,1,1hr,0,10
+Solvent control,Solvent control,2,1hr,0,10
+Solvent control,Solvent control,3,1hr,0,10
+Solvent control,Solvent control,4,1hr,0,10
+Solvent control,Solvent control,1,2hr,0,10
+Solvent control,Solvent control,2,2hr,0,10
+Solvent control,Solvent control,3,2hr,0,10
+Solvent control,Solvent control,4,2hr,0,10
+Solvent control,Solvent control,1,3hr,0,10
+Solvent control,Solvent control,2,3hr,0,10
+Solvent control,Solvent control,3,3hr,0,10
+Solvent control,Solvent control,4,3hr,0,10
+Solvent control,Solvent control,1,4hr,0,10
+Solvent control,Solvent control,2,4hr,0,10
+Solvent control,Solvent control,3,4hr,0,10
+Solvent control,Solvent control,4,4hr,0,10
+Solvent control,Solvent control,1,5hr,0,10
+Solvent control,Solvent control,2,5hr,0,10
+Solvent control,Solvent control,3,5hr,0,10
+Solvent control,Solvent control,4,5hr,0,10
+Solvent control,Solvent control,1,6hr,0,10
+Solvent control,Solvent control,2,6hr,0,10
+Solvent control,Solvent control,3,6hr,0,10
+Solvent control,Solvent control,4,6hr,0,10
+Actellic_cv,Positive control,1,1hr,10,0
+Actellic_cv,Positive control,2,1hr,10,0
+Actellic_cv,Positive control,3,1hr,9,1
+Actellic_cv,Positive control,4,1hr,10,0
+Actellic_cv,Positive control,1,2hr,9,1
+Actellic_cv,Positive control,2,2hr,10,0
+Actellic_cv,Positive control,3,2hr,9,1
+Actellic_cv,Positive control,4,2hr,10,0
+Actellic_cv,Positive control,1,3hr,10,0
+Actellic_cv,Positive control,2,3hr,10,0
+Actellic_cv,Positive control,3,3hr,10,0
+Actellic_cv,Positive control,4,3hr,10,0
+Actellic_cv,Positive control,1,4hr,10,0
+Actellic_cv,Positive control,2,4hr,10,0
+Actellic_cv,Positive control,3,4hr,10,0
+Actellic_cv,Positive control,4,4hr,10,0
+Actellic_cv,Positive control,1,5hr,9,1
+Actellic_cv,Positive control,2,5hr,10,0
+Actellic_cv,Positive control,3,5hr,10,0
+Actellic_cv,Positive control,4,5hr,10,0
+Actellic_cv,Positive control,1,6hr,10,0
+Actellic_cv,Positive control,2,6hr,10,0
+Actellic_cv,Positive control,3,6hr,10,0
+Actellic_cv,Positive control,4,6hr,10,0
+Actellic_ss,Positive control,1,1hr,10,0
+Actellic_ss,Positive control,2,1hr,10,0
+Actellic_ss,Positive control,3,1hr,10,0
+Actellic_ss,Positive control,4,1hr,10,0
+Actellic_ss,Positive control,1,2hr,10,0
+Actellic_ss,Positive control,2,2hr,9,1
+Actellic_ss,Positive control,3,2hr,9,1
+Actellic_ss,Positive control,4,2hr,10,0
+Actellic_ss,Positive control,1,3hr,10,0
+Actellic_ss,Positive control,2,3hr,10,0
+Actellic_ss,Positive control,3,3hr,10,0
+Actellic_ss,Positive control,4,3hr,9,1
+Actellic_ss,Positive control,1,4hr,10,0
+Actellic_ss,Positive control,2,4hr,10,0
+Actellic_ss,Positive control,3,4hr,10,0
+Actellic_ss,Positive control,4,4hr,9,1
+Actellic_ss,Positive control,1,5hr,10,0
+Actellic_ss,Positive control,2,5hr,10,0
+Actellic_ss,Positive control,3,5hr,10,0
+Actellic_ss,Positive control,4,5hr,10,0
+Actellic_ss,Positive control,1,6hr,10,0
+Actellic_ss,Positive control,2,6hr,10,0
+Actellic_ss,Positive control,3,6hr,10,0
+Actellic_ss,Positive control,4,6hr,10,0
+C_volkensii,10g,1,1hr,7,3
+C_volkensii,10g,2,1hr,7,3
+C_volkensii,10g,3,1hr,8,2
+C_volkensii,10g,4,1hr,6,4
+C_volkensii,10g,1,2hr,7,3
+C_volkensii,10g,2,2hr,6,4
+C_volkensii,10g,3,2hr,7,3
+C_volkensii,10g,4,2hr,8,2
+C_volkensii,10g,1,3hr,8,2
+C_volkensii,10g,2,3hr,7,3
+C_volkensii,10g,3,3hr,8,2
+C_volkensii,10g,4,3hr,7,3
+C_volkensii,10g,1,4hr,6,4
+C_volkensii,10g,2,4hr,7,3
+C_volkensii,10g,3,4hr,8,2
+C_volkensii,10g,4,4hr,6,4
+C_volkensii,10g,1,5hr,7,3
+C_volkensii,10g,2,5hr,7,3
+C_volkensii,10g,3,5hr,8,2
+C_volkensii,10g,4,5hr,7,3
+C_volkensii,10g,1,6hr,9,1
+C_volkensii,10g,2,6hr,9,1
+C_volkensii,10g,3,6hr,8,2
+C_volkensii,10g,4,6hr,7,3
+C_volkensii,2g,1,1hr,6,4
+C_volkensii,2g,2,1hr,6,4
+C_volkensii,2g,3,1hr,6,4
+C_volkensii,2g,4,1hr,7,3
+C_volkensii,2g,1,2hr,6,4
+C_volkensii,2g,2,2hr,5,5
+C_volkensii,2g,3,2hr,7,3
+C_volkensii,2g,4,2hr,5,5
+C_volkensii,2g,1,3hr,6,4
+C_volkensii,2g,2,3hr,6,4
+C_volkensii,2g,3,3hr,5,5
+C_volkensii,2g,4,3hr,5,5
+C_volkensii,2g,1,4hr,6,4
+C_volkensii,2g,2,4hr,6,4
+C_volkensii,2g,3,4hr,5,5
+C_volkensii,2g,4,4hr,6,4
+C_volkensii,2g,1,5hr,6,4
+C_volkensii,2g,2,5hr,6,4
+C_volkensii,2g,3,5hr,6,4
+C_volkensii,2g,4,5hr,6,4
+C_volkensii,2g,1,6hr,6,4
+C_volkensii,2g,2,6hr,6,4
+C_volkensii,2g,3,6hr,6,4
+C_volkensii,2g,4,6hr,7,3
+C_volkensii,4g,1,1hr,7,3
+C_volkensii,4g,2,1hr,6,4
+C_volkensii,4g,3,1hr,7,3
+C_volkensii,4g,4,1hr,6,4
+C_volkensii,4g,1,2hr,5,5
+C_volkensii,4g,2,2hr,6,4
+C_volkensii,4g,3,2hr,7,3
+C_volkensii,4g,4,2hr,6,4
+C_volkensii,4g,1,3hr,6,4
+C_volkensii,4g,2,3hr,7,3
+C_volkensii,4g,3,3hr,6,4
+C_volkensii,4g,4,3hr,6,4
+C_volkensii,4g,1,4hr,8,2
+C_volkensii,4g,2,4hr,6,4
+C_volkensii,4g,3,4hr,7,3
+C_volkensii,4g,4,4hr,6,4
+C_volkensii,4g,1,5hr,8,2
+C_volkensii,4g,2,5hr,6,4
+C_volkensii,4g,3,5hr,6,4
+C_volkensii,4g,4,5hr,7,3
+C_volkensii,4g,1,6hr,7,3
+C_volkensii,4g,2,6hr,6,4
+C_volkensii,4g,3,6hr,6,4
+C_volkensii,4g,4,6hr,7,3
+C_volkensii,6g,1,1hr,5,5
+C_volkensii,6g,2,1hr,6,4
+C_volkensii,6g,3,1hr,7,3
+C_volkensii,6g,4,1hr,6,4
+C_volkensii,6g,1,2hr,6,4
+C_volkensii,6g,2,2hr,5,5
+C_volkensii,6g,3,2hr,7,3
+C_volkensii,6g,4,2hr,7,3
+C_volkensii,6g,1,3hr,6,4
+C_volkensii,6g,2,3hr,7,3
+C_volkensii,6g,3,3hr,6,4
+C_volkensii,6g,4,3hr,6,4
+C_volkensii,6g,1,4hr,6,4
+C_volkensii,6g,2,4hr,7,3
+C_volkensii,6g,3,4hr,6,4
+C_volkensii,6g,4,4hr,7,3
+C_volkensii,6g,1,5hr,7,3
+C_volkensii,6g,2,5hr,7,3
+C_volkensii,6g,3,5hr,8,2
+C_volkensii,6g,4,5hr,6,4
+C_volkensii,6g,1,6hr,8,2
+C_volkensii,6g,2,6hr,7,3
+C_volkensii,6g,3,6hr,8,2
+C_volkensii,6g,4,6hr,7,3
+C_volkensii,8g,1,1hr,7,3
+C_volkensii,8g,2,1hr,6,4
+C_volkensii,8g,3,1hr,8,2
+C_volkensii,8g,4,1hr,6,4
+C_volkensii,8g,1,2hr,6,4
+C_volkensii,8g,2,2hr,5,5
+C_volkensii,8g,3,2hr,7,3
+C_volkensii,8g,4,2hr,6,4
+C_volkensii,8g,1,3hr,6,4
+C_volkensii,8g,2,3hr,8,2
+C_volkensii,8g,3,3hr,7,3
+C_volkensii,8g,4,3hr,6,4
+C_volkensii,8g,1,4hr,7,3
+C_volkensii,8g,2,4hr,7,3
+C_volkensii,8g,3,4hr,8,2
+C_volkensii,8g,4,4hr,7,3
+C_volkensii,8g,1,5hr,7,3
+C_volkensii,8g,2,5hr,6,4
+C_volkensii,8g,3,5hr,7,3
+C_volkensii,8g,4,5hr,7,3
+C_volkensii,8g,1,6hr,7,3
+C_volkensii,8g,2,6hr,6,4
+C_volkensii,8g,3,6hr,8,2
+C_volkensii,8g,4,6hr,7,3
+S_singueana,10g,1,1hr,10,0
+S_singueana,10g,2,1hr,9,1
+S_singueana,10g,3,1hr,8,2
+S_singueana,10g,4,1hr,10,0
+S_singueana,10g,1,2hr,10,0
+S_singueana,10g,2,2hr,10,0
+S_singueana,10g,3,2hr,10,0
+S_singueana,10g,4,2hr,9,1
+S_singueana,10g,1,3hr,10,0
+S_singueana,10g,2,3hr,9,1
+S_singueana,10g,3,3hr,8,2
+S_singueana,10g,4,3hr,10,0
+S_singueana,10g,1,4hr,10,0
+S_singueana,10g,2,4hr,9,1
+S_singueana,10g,3,4hr,10,0
+S_singueana,10g,4,4hr,10,0
+S_singueana,10g,1,5hr,10,0
+S_singueana,10g,2,5hr,10,0
+S_singueana,10g,3,5hr,9,1
+S_singueana,10g,4,5hr,10,0
+S_singueana,10g,1,6hr,9,1
+S_singueana,10g,2,6hr,10,0
+S_singueana,10g,3,6hr,10,0
+S_singueana,10g,4,6hr,10,0
+S_singueana,2g,1,1hr,6,4
+S_singueana,2g,2,1hr,8,2
+S_singueana,2g,3,1hr,7,3
+S_singueana,2g,4,1hr,8,2
+S_singueana,2g,1,2hr,8,2
+S_singueana,2g,2,2hr,9,1
+S_singueana,2g,3,2hr,7,3
+S_singueana,2g,4,2hr,8,2
+S_singueana,2g,1,3hr,6,4
+S_singueana,2g,2,3hr,7,3
+S_singueana,2g,3,3hr,7,3
+S_singueana,2g,4,3hr,8,2
+S_singueana,2g,1,4hr,8,2
+S_singueana,2g,2,4hr,7,3
+S_singueana,2g,3,4hr,9,1
+S_singueana,2g,4,4hr,8,2
+S_singueana,2g,1,5hr,9,1
+S_singueana,2g,2,5hr,7,3
+S_singueana,2g,3,5hr,7,3
+S_singueana,2g,4,5hr,8,2
+S_singueana,2g,1,6hr,8,2
+S_singueana,2g,2,6hr,7,3
+S_singueana,2g,3,6hr,9,1
+S_singueana,2g,4,6hr,8,2
+S_singueana,4g,1,1hr,7,3
+S_singueana,4g,2,1hr,8,2
+S_singueana,4g,3,1hr,9,1
+S_singueana,4g,4,1hr,8,2
+S_singueana,4g,1,2hr,9,1
+S_singueana,4g,2,2hr,8,2
+S_singueana,4g,3,2hr,8,2
+S_singueana,4g,4,2hr,9,1
+S_singueana,4g,1,3hr,7,3
+S_singueana,4g,2,3hr,8,2
+S_singueana,4g,3,3hr,6,4
+S_singueana,4g,4,3hr,8,2
+S_singueana,4g,1,4hr,9,1
+S_singueana,4g,2,4hr,7,3
+S_singueana,4g,3,4hr,8,2
+S_singueana,4g,4,4hr,9,1
+S_singueana,4g,1,5hr,9,1
+S_singueana,4g,2,5hr,8,2
+S_singueana,4g,3,5hr,8,2
+S_singueana,4g,4,5hr,9,1
+S_singueana,4g,1,6hr,9,1
+S_singueana,4g,2,6hr,9,1
+S_singueana,4g,3,6hr,8,2
+S_singueana,4g,4,6hr,7,3
+S_singueana,6g,1,1hr,9,1
+S_singueana,6g,2,1hr,7,3
+S_singueana,6g,3,1hr,8,2
+S_singueana,6g,4,1hr,8,2
+S_singueana,6g,1,2hr,10,0
+S_singueana,6g,2,2hr,9,1
+S_singueana,6g,3,2hr,8,2
+S_singueana,6g,4,2hr,9,1
+S_singueana,6g,1,3hr,8,2
+S_singueana,6g,2,3hr,8,2
+S_singueana,6g,3,3hr,9,1
+S_singueana,6g,4,3hr,7,3
+S_singueana,6g,1,4hr,10,0
+S_singueana,6g,2,4hr,9,1
+S_singueana,6g,3,4hr,10,0
+S_singueana,6g,4,4hr,9,1
+S_singueana,6g,1,5hr,9,1
+S_singueana,6g,2,5hr,9,1
+S_singueana,6g,3,5hr,10,0
+S_singueana,6g,4,5hr,10,0
+S_singueana,6g,1,6hr,10,0
+S_singueana,6g,2,6hr,9,1
+S_singueana,6g,3,6hr,10,0
+S_singueana,6g,4,6hr,10,0
+S_singueana,8g,1,1hr,9,1
+S_singueana,8g,2,1hr,7,3
+S_singueana,8g,3,1hr,8,2
+S_singueana,8g,4,1hr,9,1
+S_singueana,8g,1,2hr,8,2
+S_singueana,8g,2,2hr,7,3
+S_singueana,8g,3,2hr,8,2
+S_singueana,8g,4,2hr,9,1
+S_singueana,8g,1,3hr,10,0
+S_singueana,8g,2,3hr,9,1
+S_singueana,8g,3,3hr,8,2
+S_singueana,8g,4,3hr,9,1
+S_singueana,8g,1,4hr,10,0
+S_singueana,8g,2,4hr,9,1
+S_singueana,8g,3,4hr,8,2
+S_singueana,8g,4,4hr,10,0
+S_singueana,8g,1,5hr,10,0
+S_singueana,8g,2,5hr,9,1
+S_singueana,8g,3,5hr,10,0
+S_singueana,8g,4,5hr,10,0
+S_singueana,8g,1,6hr,10,0
+S_singueana,8g,2,6hr,10,0
+S_singueana,8g,3,6hr,10,0
+S_singueana,8g,4,6hr,9,1
