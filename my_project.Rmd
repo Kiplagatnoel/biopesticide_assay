@@ -1,0 +1,1973 @@
+---
+title: "ANTIFEEDANT, INSECTICIDAL ACTIVITIES AND PHYTOCHEMICAL ANALYSIS OF Caesalpinia volkensii and Senna singueana LEAF EXTRACTS AGAINST Callosobruchus maculatus."
+author: "Kiplagat John Noel"
+output:
+  html_document: default
+word_document: default
+date: "`r Sys.Date()`"
+---
+  
+
+```{r, echo=FALSE}
+library("knitr")
+knitr::opts_chunk$set(fig.align="center", fig.width=6, fig.height=6)
+options(width=90)
+
+```
+  
+  
+```{r, echo=FALSE}
+suppressPackageStartupMessages({
+  library(knitr)
+  library(DT)
+  library(reshape2)
+  library(ggplot2)
+  library(ggpubr)
+  library(purrr)
+  library(multcompView)
+  library(multcomp)
+  library(emmeans)
+  library(tidyverse)
+  library(kableExtra)
+  library(rstatix)
+  library(magrittr)
+  library(data.table)
+  library(scales)
+  library(plyr)
+  library(cowplot)
+})
+
+```
+
+
+
+```{r, echo=FALSE}
+# Set dimensions (531px height x 1328px width at 300dpi)
+img_width <- 1328/300  # ~4.43 inches
+img_height <- 531/300  # ~1.77 inches
+
+
+# Function to make HTML tables
+print_table <- function(table, rownames = FALSE, digits = 3, ...){
+  DT::datatable(table, rownames = rownames, extensions = 'Buttons',
+                options = list(scrollX = TRUE, 
+                               dom = '<<t>Bp>',
+                               buttons = c('copy', 'excel', 'pdf', 'print')), ...) %>%
+    formatSignif(columns = c(as.numeric(which(sapply(table, class) == "numeric"))), digits = digits)}
+
+
+# function to calculate mean plus/minus std error
+meanse <- function(x, ...){
+  mean1 <-   signif(round(mean(x, na.rm=T),2), 3)   #calculate mean and round
+  se1 <- signif(round(sd(x, na.rm=T)/sqrt(sum(!is.na(x))), 2),2) # std error - round adding zeros
+  out <- paste0(round(mean1,2), "\u00b1", round(se1,2))  # paste together mean plus/minus and standard error
+  if (str_detect(out,"NA")) {out="NA"}   # if missing do not add plusminus
+  return(out)
+}
+# This function will output mean with sd in parentheses
+meansd <- function(x, ...){
+  mean1 <-   signif(round(mean(x, na.rm=T),2), 3)   #calculate mean and round
+  sd1 <- signif(round(sd(x, na.rm=T), 3),3) # std deviation - round adding zeros
+  psd <- paste0("(", "\u00b1", sd1, ")", sep="") #remove spaces
+  out <- paste0(mean1, psd)  # paste together mean  standard deviation
+  if (str_detect(out,"NA")) {out="NA"}   # if missing do not add sd
+  return(out)
+}
+#This function will give the mean with the range
+meanrng <- function(x, ...){
+  mean1 <-   signif(round(mean(x, na.rm=T),2), 3)   #calculate mean and round
+  range1 <- range(x, na.rm=T) 
+  rup <- signif(round(range1[2],2), 3)
+  rlow <- signif(round(range1[1],2), 3)   # range
+  p_range <- paste0("(", rlow,", ",rup, ")", sep="")
+  out <- paste0(mean1, p_range)  # paste and range
+  if (str_detect(out,"Na")) {out="NA"}   # if missing do not add range -note it is Na
+  return(out)
+}
+
+
+meanfun <- function(x, ...){
+  mean1 <-   signif(round(mean(x, na.rm=T),2), 3)   #calculate mean and round
+  out <- paste0("(",round(mean1,2),")")  # paste together mean plus/minus and standard error
+  if (str_detect(out,"NA")) {out="NA"}   # if missing do not add plusminus
+  return(out)
+}
+
+
+
+
+facet_labels <- function(variable, value) {
+    labels <- as.character(value)
+    labels[labels == 'X6hr'] <- '6hr'
+    labels[labels == 'X24hr'] <- '24hr'
+    labels[labels == 'X48hr'] <- '48hr'
+    labels[labels == 'X72hr'] <- '72hr'
+    labels[labels == 'X96hr'] <- '96hr'
+    return (labels)
+}
+
+
+```
+
+
+
+#Contact Toxicity Assay
+# Imported Raw data for Contact toxicity assay
+```{r, echo=FALSE}
+# Import dataset
+#tox_df <- read.csv("Afi_raw_data.csv")
+tox_df <- read.csv("mortality_dataset.csv")
+# Convert these two columns to factor
+tox_df <- tox_df %>% rstatix::convert_as_factor(Plant, Trt)
+# Set and order treatment levels
+tox_df$Trt <- factor(tox_df$Trt,
+                     levels=c("Untreated control", "Solvent control",  "2g", "4g", "6g", "8g", "10g","Positive control"),ordered = TRUE)
+
+# tox_df <- tox_df %>% 
+#   dplyr::rename(
+#      `6hr`=X6hr,
+#     `24hr`=X24hr,
+#     `48hr`=X48hr,
+#     `72hr`=X72hr,
+#     `96hr`=X96hr
+#     )
+
+
+df <- tox_df
+# Code the third to last column as numeric
+df[,3:ncol(df)] <- sapply(df[,3:ncol(df)], as.numeric)
+
+# Divide each value in numeric columns by 10 (Total Insects per petri dish) and convert to percentage
+
+#  M=((Dn/Tn)* 100)
+df[,3:ncol(df)] <- sapply(df[,3:ncol(df)], function(x) ((x/10)* 100))
+#Print datatable
+print_table(df)
+
+```
+
+
+#Corrected mortality
+```{r,echo=FALSE}
+corr_mot<-df
+#  %CM = ((Pt-Pc)/(100-Pc)× 100)
+corr_mot[,3:ncol(corr_mot)] <- sapply(corr_mot[,3:ncol(corr_mot)], function(x) ((x-0)/(100-0)* 100))
+
+#Print datatable
+print_table(corr_mot)
+
+```
+
+
+# ALL in ONE function to create APA statistics
+```{r, echo=FALSE}
+create_cld_df <- function(df){
+    
+    run_anova <- function(df) {
+        aov(Mot ~ Trt, data = df)
+    }
+    
+    anov <- dlply(df, "Time", run_anova)
+    
+    run_tukey <- function(anov_obj){
+        TukeyHSD(anov_obj)
+    }
+    
+    tuk <- llply(anov, run_tukey)
+    
+    run_emmeans <- function(anov_obj){
+        emmeans(anov_obj, specs = c("Trt"))
+    }
+    
+    em <- llply(anov, run_emmeans)
+    
+    run_cld <- function(emmeans_obj){
+        cld(emmeans_obj,adjust= 'tukey' ,Letters = letters ,alpha = 0.05 ,reversed = TRUE,decreasing = TRUE)
+    }
+    
+    cld <- llply(em, run_cld)
+    cld_df <- ldply(cld, data.frame)
+    names(cld_df)[1]<-"Time"
+    cld_df$.group <- str_trim(cld_df$.group)
+
+
+    stat_summary <- function(df){
+        stat <- df %>% group_by(Trt,Time) %>% 
+            dplyr::summarise( 
+                count = (dplyr::n()), 
+                mean = mean(Mot, na.rm = TRUE), 
+                sd = sd(Mot, na.rm = TRUE),
+                se = round(sd/sqrt(count),2),
+                mean_se = paste0(round(mean,2),"\u00b1", se, sep="")
+            )
+    }
+    
+    stat <- stat_summary(df)
+    m<-merge(cld_df, stat, by.x = c("Time","Trt"), by.y = c("Time","Trt"),all.x = TRUE)
+    m <- m %>% mutate(mean_se=paste0(mean_se,.group))
+}
+
+
+```
+
+
+
+# Grouped barplot of contact toxicity by time and conc. for SS
+```{r, echo=FALSE}
+ss_dat <- corr_mot[!corr_mot$Plant %in% ("cv"), ]
+
+tox_dat_ss <- ss_dat %>% pivot_longer(cols = contains("X"), names_to = "Time", values_to = "Mot")
+
+# tox_ss_df <- tox_dat_ss[!tox_dat_ss$Plant %in% c("DCM", "Actellic","None","cv"),]
+# tox_ss_df <- tox_ss_df[!tox_ss_df$Trt %in% c("Positive control","Solvent control","Untreated control"),]
+# 
+# tox_ss_df$Trt <- factor(tox_ss_df$Trt, levels = c("2g","4g","6g","8g","10g"), labels = c("2g","4g","6g","8g","10g"),ordered = TRUE )
+
+
+#tox_CLD_df_ss<-create_cld_df(tox_ss_df)tox_dat_ss
+
+tox_CLD_df_ss<-create_cld_df(tox_dat_ss)
+
+
+#tox_CLD_df_ss <- tox_CLD_df_ss[!tox_CLD_df_ss$Trt %in% c("Solvent control","Untreated control"),]
+
+tox_CLD_df_ss$Trt <- factor(tox_CLD_df_ss$Trt,levels = c("Solvent control","Untreated control","2g","4g","6g","8g","10g","Positive control"),labels =  c("Solvent","Untreated ","2g","4g","6g","8g","10g","Actelic"), ordered = TRUE)
+
+tox_CLD_df_ss$Time <- factor(tox_CLD_df_ss$Time, levels = c("X6hr", "X24hr", "X48hr", "X72hr", "X96hr"),labels = c("6hr", "24hr", "48hr", "72hr", "96hr"))
+
+
+tuk_tox_ss <- tox_dat_ss %>%
+    tukey_hsd(Mot ~ Trt) %>%   
+    add_xy_position() %>%         
+    add_significance()
+
+
+
+bp_tox_ss <- ggbarplot(tox_CLD_df_ss, x = "Trt", y = "mean", fill = "Trt",  
+                       palette = c("#0082c8","#4DAF4A","dodgerblue4","olivedrab3", "darkgoldenrod1","#00AFBB","#D55E00", "#009E73"),position = position_dodge(0.8)
+) +
+    geom_errorbar(aes(group=Trt,y = mean,
+                      ymin = mean - se,
+                      ymax = mean + se),
+                  width = 0.2,position = position_dodge(0.8),vjust = 0)+ geom_text(aes(group=Trt,label = .group, y = mean + se), position = position_dodge(0.90),size=3,
+                                                                                    vjust=-0.5, hjust=0.55, colour = "gray25")+scale_y_continuous(breaks = scales::breaks_width(20))+
+    rotate_x_text(angle = 45) +# CHANGE THIS TO DESIRED VALUE
+    facet_wrap(~Time, scales = "free_x", nrow = 1, strip.position = "bottom")+
+    theme(strip.placement = "outside",legend.key.size = unit(0.35, 'cm'),axis.text.x = element_text(size = 7), text = element_text(size = 9), legend.direction = "horizontal")+
+       guides(fill = guide_legend(nrow = 1))  # Ensure legend appears in a single row
+
+ggpar(bp_tox_ss, ylim = c(0,100), xlab="Extract concentration (g/100ml) and Time (hrs)",ylab="Mortality (%)",legend = "bottom", legend.title = "")
+
+# Save in preferred formats
+ggsave("graphical_abstract.tiff", bp_tox_ss, 
+       width = img_width, height = img_height, dpi = 300,
+       compression = "lzw")
+
+ggsave("graphical_abstract.pdf", bp_tox_ss,
+       width = img_width, height = img_height, device = cairo_pdf)
+
+
+```
+
+
+
+# APA table for Contact toxicity effects of Senna singueana
+```{r, echo=FALSE}
+
+tox_ss1 <- tox_dat_ss[!tox_dat_ss$Plant %in% c("cv"), ]
+plot_data_ss<-create_cld_df(tox_ss1)
+
+
+apa_ss <- plot_data_ss %>% pivot_wider(id_cols = Trt, names_from = Time, values_from = mean_se)
+apa_ss  <- apa_ss[c(8:6,2:5,1), c(1,4,2,3,5,6)]
+apa_ss
+# print a nice APA table
+print_table(apa_ss)
+
+
+```
+
+
+# Grouped barplot of contact toxicity by time and conc. for Cv
+```{r, echo=FALSE}
+cv_dat <- corr_mot[!corr_mot$Plant %in% ("ss"), ]
+
+tox_dat_cv <- cv_dat %>% pivot_longer(cols = contains("X"), names_to = "Time", values_to = "Mot")
+
+# tox_ss_df <- tox_dat_ss[!tox_dat_ss$Plant %in% c("DCM", "Actellic","None","cv"),]
+# tox_ss_df <- tox_ss_df[!tox_ss_df$Trt %in% c("Positive control","Solvent control","Untreated control"),]
+# 
+# tox_ss_df$Trt <- factor(tox_ss_df$Trt, levels = c("2g","4g","6g","8g","10g"), labels = c("2g","4g","6g","8g","10g"),ordered = TRUE )
+
+
+#tox_CLD_df_ss<-create_cld_df(tox_ss_df)tox_dat_ss
+
+tox_CLD_df_cv<-create_cld_df(tox_dat_cv)
+
+
+#tox_CLD_df_cv <- tox_CLD_df_cv[!tox_CLD_df_cv$Trt %in% c("Solvent control","Untreated control"),]
+
+tox_CLD_df_cv$Trt <- factor(tox_CLD_df_cv$Trt,levels = c("Solvent control","Untreated control","2g","4g","6g","8g","10g","Positive control"),labels =  c("Untreated","Solvent","2g","4g","6g","8g","10g","Actelic"), ordered = TRUE)
+
+tox_CLD_df_cv$Time <- factor(tox_CLD_df_cv$Time, levels = c("X6hr", "X24hr", "X48hr", "X72hr", "X96hr"),labels = c("6hr", "24hr", "48hr", "72hr", "96hr"))
+
+
+
+tuk_tox_cv <- tox_dat_cv %>%
+    tukey_hsd(Mot ~ Trt) %>%   
+    add_xy_position() %>%         
+    add_significance()
+
+
+
+bp_tox_cv <- ggbarplot(tox_CLD_df_cv, x = "Trt", y = "mean", fill = "Trt",  
+                       palette = c("#0082c8","#4DAF4A","dodgerblue4","olivedrab3", "darkgoldenrod1","#00AFBB","#D55E00", "#009E73"),position = position_dodge(0.8)
+) +
+    geom_errorbar(aes(group=Trt,y = mean,
+                      ymin = mean - se,
+                      ymax = mean + se),
+                  width = 0.2,position = position_dodge(0.8),vjust = 0)+ geom_text(aes(group=Trt,label = .group, y = mean + se), position = position_dodge(0.90),size=3,
+                                                                                    vjust=-0.5, hjust=0.55, colour = "gray25")+scale_y_continuous(breaks = scales::breaks_width(20))+
+    rotate_x_text(angle = 45) +# CHANGE THIS TO DESIRED VALUE
+    facet_wrap(~Time, scales = "free_x", nrow = 1, strip.position = "bottom")+
+    theme(strip.placement = "outside",legend.key.size = unit(0.35, 'cm'),axis.text.x = element_text(size = 7), text = element_text(size = 9), legend.direction = "horizontal")+
+       guides(fill = guide_legend(nrow = 1))  # Ensure legend appears in a single row
+
+ggpar(bp_tox_cv, ylim = c(0,100), xlab="Extract concentration (g/100ml) and Time (hrs)",ylab="Mortality (%)",legend = "bottom", legend.title = "")
+
+
+```
+
+
+# APA table for Contact toxicity effects of C. volkensii
+```{r, echo=FALSE}
+
+tox_cv1 <- tox_dat_cv[!tox_dat_cv$Plant %in% c("ss"), ]
+plot_data_cv<-create_cld_df(tox_cv1)
+
+apa_cv <- plot_data_cv %>% pivot_wider(id_cols = Trt, names_from = Time, values_from = mean_se)
+apa_cv  <- apa_cv[c(8:6,2:5,1), c(1,4,2,3,5,6)]
+apa_cv
+# print a nice APA table
+print_table(apa_cv)
+
+
+```
+
+
+
+
+
+#### TOXICITY BOTH AND FACeted
+## COMPARISON USING t-test
+# t-test comparison for toxicity of both Ss and Cv
+```{r, echo=FALSE}
+tox_both <- rbind(tox_ss1,tox_cv1)
+
+# Select rows not containing  levels for Plant
+tox_both <- tox_both[which(!tox_both$Plant %in% c("Actelic","DCM","None")), ]
+
+# Change levels names for Plant column
+tox_both <- tox_both %>% mutate(Plant = case_when(
+    Plant == "ss" ~ "S. singueana",
+    Plant == "cv" ~ "C. volkensii"
+))
+
+tox_both$Time <- factor(tox_both$Time, levels = c("X6hr","X24hr","X48hr","X72hr","X96hr"),labels = c("6hr","24hr","48hr","72hr","96hr"),ordered = TRUE)
+
+
+
+# Function to create summaries
+create_tt_df <- function(df){
+    
+    run_tTest <- function(df_obj){
+        df_obj %>%
+            group_by(Trt,Time) %>%
+            t_test(Mot ~ Plant, paired = FALSE) %>%
+            adjust_pvalue(method = "BH") %>%
+            add_significance() %>% add_xy_position()
+    }
+
+#create the summaries    
+tt <- run_tTest(df)
+    
+    run_summary <- function(df_obj){
+        obj_tt <- Rmisc::summarySE(df_obj, measurevar = "Mot", groupvars = c("Plant","Trt","Time"), na.rm = TRUE)
+    }
+    
+    sum <- run_summary(df)
+    
+    return(list("t-test_df"=tt,"summary_df"=sum))
+    
+}
+
+# Actual summaries
+ts<-create_tt_df(tox_both)
+
+
+
+tt_comp_plot <- ggplot(ts$summary_df, aes(x = Trt, y = Mot)) +
+    geom_bar(aes(fill = Plant),stat = "identity", position = position_dodge(0.8),width = 0.7) + facet_wrap(~Time, scales = "free_x",nrow = 1,strip.position = "bottom", labeller= facet_labels)+ geom_errorbar(aes(group=Plant,y=Mot, ymin= Mot - se, ymax=Mot+se),data = ts$summary_df,position = position_dodge(0.8),width=0.4)+ 
+    theme(strip.placement = "outside")+ 
+    scale_y_continuous(expand = c(0,0))+
+    theme(
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.background = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.text = element_text(face = "italic"),
+        axis.line = element_line(),
+        legend.title = element_blank(),
+        legend.key.size = unit(.35, 'cm'),
+        legend.position = "bottom"
+    ) +
+    scale_fill_manual(values = c("#4DAF4A","dodgerblue4"))+
+    
+    stat_pvalue_manual(
+        ts$`t-test_df`, x = "Trt", y.position = ts$`t-test_df`$y.position,
+        label = "p.adj.signif",
+        position = position_dodge(0.8),size = 2.0
+    ) 
+
+ggpar(tt_comp_plot, xlab = "Extract concentration (g/100ml) and Time (hrs)", ylab = "Mortality (%)")
+
+
+```
+
+
+###################################################################################################
+
+# REPELENCE ASSAY
+# Imported Raw Data on Repellence assay
+```{r, echo=FALSE}
+rep_df  <- read.csv("Repellence_data_one.csv") 
+rep_df$PR <- Map(function(x,y){((x-y)/(x+y))*100}, rep_df$N_control, rep_df$N_treated)
+rep_df$IR <- Map(function(x,y){((2*y)/(x+y))}, rep_df$N_control, rep_df$N_treated)
+
+rep_df <- rep_df %>% convert_as_factor(Plant,Trt,Rep,Time)
+rep_df[,5:ncol(rep_df)] <- sapply(rep_df[,5:ncol(rep_df)], as.numeric)
+rep_df$Trt <- factor(rep_df$Trt, levels = c("Untreated control","Solvent control", "2g", "4g", "6g","8g", "10g","Positive control"),labels=c("Untreated","Solvent", "2g", "4g", "6g","8g", "10g","Actelic"), ordered = TRUE)
+
+rep_df <- rep_df %>% mutate(PR=ifelse(PR< 0, 0, PR))
+
+print_table(rep_df)
+
+```
+
+
+
+
+```{r, echo=FALSE}
+
+rep_PR_ss <- rep_df[!rep_df$Plant %in% c("C_volkensii", "Actellic_cv"),]
+
+rep_PR_cv <- rep_df[!rep_df$Plant %in% c("S_singueana", "Actellic_ss"),]
+
+print_table(rep_PR_ss)
+print_table(rep_PR_cv)
+
+```
+
+
+
+# ALL in ONE function to create APA statistics
+```{r, echo=FALSE}
+create_rep_cld_df <- function(df){
+    
+    run_anova <- function(df) {
+        aov(PR ~ Trt, data = df)
+    }
+    
+    anov <- dlply(df, "Time", run_anova)
+    
+    run_tukey <- function(anov_obj){
+        TukeyHSD(anov_obj)
+    }
+    
+    tuk <- llply(anov, run_tukey)
+    
+    run_emmeans <- function(anov_obj){
+        emmeans(anov_obj, specs = c("Trt"))
+    }
+    
+    em <- llply(anov, run_emmeans)
+    
+    run_cld <- function(emmeans_obj){
+        cld(emmeans_obj,adjust= 'sidak' ,Letters = letters ,alpha = 0.05 ,reversed = TRUE,decreasing = TRUE)
+    }
+    
+    cld <- llply(em, run_cld)
+    cld_df <- ldply(cld, data.frame)
+    names(cld_df)[1]<-"Time"
+    cld_df$.group <- str_trim(cld_df$.group)
+
+
+    stat_summary <- function(df){
+        stat <- df %>% group_by(Trt,Time) %>% 
+            dplyr::summarise( 
+                count = (dplyr::n()), 
+                mean = mean(PR, na.rm = TRUE), 
+                sd = sd(PR, na.rm = TRUE),
+                se = round(sd/sqrt(count),2),
+                mean_se = paste0(round(mean,2),"\u00b1", se, sep="")
+            )
+    }
+    
+    stat <- stat_summary(df)
+    m<-merge(cld_df, stat, by.x = c("Time","Trt"), by.y = c("Time","Trt"),all.x = TRUE)
+    m <- m %>% mutate(mean_se=paste0(mean_se,.group))
+}
+
+
+```
+
+
+
+# Grouped barplot of repellent effects by time and conc. for SS
+```{r, echo=FALSE}
+
+# # Senna only
+rep_PR_ss_all <- create_rep_cld_df(rep_PR_ss)
+# chaged  rep_CLD_df_ss to rep_PR_CLD_df_ss
+rep_PR_ss_all$Time <- factor(rep_PR_ss_all$Time, levels = c("1hr", "2hr", "3hr", "4hr", "5hr","6hr"),labels = c("1hr", "2hr", "3hr", "4hr", "5hr","6hr"))
+
+
+rep_PR_ss_only <- rep_PR_ss_all
+
+bp_rep_ss <- ggbarplot(rep_PR_ss_only, x = "Trt", y = "mean", fill = "Trt",  
+                       palette = c("#0082c8","#4DAF4A","dodgerblue4","olivedrab3", "darkgoldenrod1","#00AFBB","#D55E00", "#009E73"),position = position_dodge(0.8)
+) +
+    geom_errorbar(aes(group=Trt,y = mean,
+                      ymin = mean - se,
+                      ymax = mean + se),
+                  width = 0.2,position = position_dodge(0.8),vjust = 0)+ geom_text(aes(group=Trt,label = .group, y = mean + se), position = position_dodge(0.90),size=3,
+                                                                                    vjust=-0.5, hjust=0.55, colour = "gray25")+scale_y_continuous(breaks = scales::breaks_width(20))+
+    rotate_x_text(angle = 45) +# CHANGE THIS TO DESIRED VALUE
+    facet_wrap(~Time, scales = "free_x", nrow = 1, strip.position = "bottom")+
+    theme(strip.placement = "outside",legend.key.size = unit(0.35, 'cm'),axis.text.x = element_text(size = 7), text = element_text(size = 9), legend.direction = "horizontal")+
+       guides(fill = guide_legend(nrow = 1))  # Ensure legend appears in a single row
+    
+
+ggpar(bp_rep_ss, ylim = c(0,100), xlab="Extract concentration (g/100ml) and Time (hrs)",ylab="Repellence (%)",legend = "bottom", legend.title = "")
+
+
+```
+
+
+
+
+# Grouped barplot of repellent effects by time and conc. for Cv
+```{r, echo=FALSE}
+# # Senna only
+rep_PR_cv_all <- create_rep_cld_df(rep_PR_cv)
+# chaged  rep_CLD_df_ss to rep_PR_CLD_df_ss
+rep_PR_cv_all$Time <- factor(rep_PR_cv_all$Time, levels = c("1hr", "2hr", "3hr", "4hr", "5hr","6hr"),labels = c("1hr", "2hr", "3hr", "4hr", "5hr","6hr"))
+
+rep_PR_cv_only <- rep_PR_cv_all
+
+
+
+bp_rep_cv <- ggbarplot(rep_PR_cv_only, x = "Trt", y = "mean", fill = "Trt",  
+                       palette = c("#0082c8","#4DAF4A","dodgerblue4","olivedrab3", "darkgoldenrod1","#00AFBB","#D55E00", "#009E73"),position = position_dodge(0.8)
+) +
+    geom_errorbar(aes(group=Trt,y = mean,
+                      ymin = mean - se,
+                      ymax = mean + se),
+                  width = 0.2,position = position_dodge(0.8),vjust = 0)+ geom_text(aes(group=Trt,label = .group, y = mean + se), position = position_dodge(0.90),size=3,
+                                                                                    vjust=-0.5, hjust=0.55, colour = "gray25")+scale_y_continuous(breaks = scales::breaks_width(20))+
+    rotate_x_text(angle = 45) +# CHANGE THIS TO DESIRED VALUE
+    facet_wrap(~Time, scales = "free_x", nrow = 1, strip.position = "bottom")+
+    theme(strip.placement = "outside",legend.key.size = unit(0.35, 'cm'),axis.text.x = element_text(size = 7), text = element_text(size = 9), legend.direction = "horizontal")+
+       guides(fill = guide_legend(nrow = 1))  # Ensure legend appears in a single row
+    
+
+ggpar(bp_rep_cv, ylim = c(0,100), xlab="Extract concentration (g/100ml) and Time (hrs)",ylab="Repellence (%)",legend = "bottom", legend.title = "")
+
+
+```
+
+
+
+# Combined APA table for Repellent effects for S. singueana
+## One-way ANOVA (overal means) for Trt using  Repellence Index (IR) dataframe
+## Use original dataframe (rep_df) with both "PR" and "IR" columns
+```{r, echo=FALSE}
+# PR stats
+overall_PR_ss<- rep_df %>% pivot_wider(id_cols = 1:3, names_from = Time, values_from = PR)
+overall_PR_ss <- overall_PR_ss[!overall_PR_ss$Plant %in% c("C_volkensii", "Actellic_cv"),]
+#print_table(overall_PR_ss)
+
+## Mse table for individua IR of S. singueana across time
+overall_PR_ss<-overall_PR_ss[,-c(1,3)]
+
+
+overall_PR_ss$AV_PR  <- apply(overall_PR_ss[,c(2:7)], MARGIN=1, FUN=function(x) mean(x))
+
+
+overall_PR_ss_stats <- overall_PR_ss %>% group_by(Trt) %>% 
+    dplyr::summarise( 
+        count = (dplyr::n()), 
+        mean = mean(AV_PR, na.rm = TRUE), 
+        sd = sd(AV_PR, na.rm = TRUE),
+        se = round(sd/sqrt(count),2),
+        mean_se_ss = paste0(round(mean,2),"\u00b1", se, sep="")
+    )
+
+#print_table(overall_PR_ss_stats)
+
+
+
+overall_PR_ss_aov <- aov(AV_PR~Trt,overall_PR_ss)
+em_overall_PR_ss<-emmeans::emmeans(overall_PR_ss_aov, specs = "Trt")
+#em_Average_PR_ss
+
+CLD_overall_PR_ss <- cld(em_overall_PR_ss,adjust= 'sidak' ,Letters = letters ,alpha = 0.05 ,reversed =TRUE,decreasing = TRUE)
+CLD_overall_PR_ss <- data.frame(CLD_overall_PR_ss)
+CLD_overall_PR_ss <- CLD_overall_PR_ss[c(8,7,1,6:2), ]
+
+CLD_overall_PR_ss$SE <- overall_PR_ss_stats$se
+#print_table(CLD_overall_PR_ss)
+
+mse_overall_PR_ss <- data.frame(Trt=CLD_overall_PR_ss$Trt,
+mean = round(CLD_overall_PR_ss$emmean,2),                               
+se= round(CLD_overall_PR_ss$SE,2),
+.group = CLD_overall_PR_ss$.group,
+mean_se=paste0(paste0(round(CLD_overall_PR_ss$emmean,2),"\u00b1", round(CLD_overall_PR_ss$SE,2)), CLD_overall_PR_ss$.group)) 
+
+# IR stats
+overall_IR_ss<- rep_df %>% pivot_wider(id_cols = 1:3, names_from = Time, values_from = IR)
+overall_IR_ss <- overall_IR_ss[!overall_IR_ss$Plant %in% c("C_volkensii", "Actellic_cv"),]
+#print_table(overall_IR_ss)
+
+## Mse table for individua IR of S. singueana across time
+overall_IR_ss<-overall_IR_ss[,-c(1,3)]
+
+
+overall_IR_ss$AV_IR  <- apply(overall_IR_ss[,c(2:7)], MARGIN=1, FUN=function(x) mean(x))
+
+
+overall_IR_ss_stats <- overall_IR_ss %>% group_by(Trt) %>% 
+    dplyr::summarise( 
+        count = (dplyr::n()), 
+        mean = mean(AV_IR, na.rm = TRUE), 
+        sd = sd(AV_IR, na.rm = TRUE),
+        se = round(sd/sqrt(count),2),
+        mean_se_ss = paste0(round(mean,2),"\u00b1", se, sep="")
+    )
+
+#print_table(overall_IR_ss_stats)
+
+
+
+overall_IR_ss_aov <- aov(AV_IR~Trt,overall_IR_ss)
+em_overall_IR_ss<-emmeans::emmeans(overall_IR_ss_aov, specs = "Trt")
+#em_Average_PR_ss
+
+CLD_overall_IR_ss <- cld(em_overall_IR_ss,adjust= 'sidak' ,Letters = letters ,alpha = 0.05 ,reversed =TRUE,decreasing = TRUE)
+
+
+CLD_overall_IR_ss <- data.frame(CLD_overall_IR_ss)
+CLD_overall_IR_ss <- CLD_overall_IR_ss[c(1,2,8,3:7), ]
+
+CLD_overall_IR_ss$SE <- overall_IR_ss_stats$se
+#print_table(CLD_overall_IR_ss)# Use this for plotting mean ± se graphs
+
+
+mse_overall_IR_ss <- data.frame(Trt=CLD_overall_IR_ss$Trt,
+mean = round(CLD_overall_IR_ss$emmean,2),                               
+se= round(CLD_overall_IR_ss$SE,2),
+.group = CLD_overall_IR_ss$.group,
+mean_se=paste0(paste0(round(CLD_overall_IR_ss$emmean,2),"\u00b1", round(CLD_overall_IR_ss$SE,2)), CLD_overall_IR_ss$.group)) 
+
+ss_PR_IR_APA <- data.frame(Trt=mse_overall_PR_ss$Trt,
+                          PR_mean=mse_overall_PR_ss$mean,
+                          PR_se=mse_overall_PR_ss$se,
+                          PR.group=mse_overall_PR_ss$.group, IR_mean=mse_overall_IR_ss$mean,
+                          IR_se=mse_overall_IR_ss$se,
+                          IR.group=mse_overall_IR_ss$.group,
+                          PR=mse_overall_PR_ss$mean_se, IR=mse_overall_IR_ss$mean_se) 
+
+print_table(ss_PR_IR_APA)
+
+#write.csv(ss_PR_IR_APA, "mean_PR_and_IR_for_senna.csv",row.names = FALSE)
+
+```
+
+
+
+
+# ALL in ONE function to create APA statistics
+```{r, echo=FALSE}
+create_rep_IR_cld_df <- function(df){
+    
+    run_anova <- function(df) {
+        aov(IR ~ Trt, data = df)
+    }
+    
+    anov <- dlply(df, "Time", run_anova)
+    
+    run_tukey <- function(anov_obj){
+        TukeyHSD(anov_obj)
+    }
+    
+    tuk <- llply(anov, run_tukey)
+    
+    run_emmeans <- function(anov_obj){
+        emmeans(anov_obj, specs = c("Trt"))
+    }
+    
+    em <- llply(anov, run_emmeans)
+    
+    run_cld <- function(emmeans_obj){
+        cld(emmeans_obj,adjust= 'tukey' ,Letters = letters ,alpha = 0.05 ,reversed = TRUE,decreasing = FALSE)
+    }
+    
+    cld <- llply(em, run_cld)
+    cld_df <- ldply(cld, data.frame)
+    names(cld_df)[1]<-"Time"
+    cld_df$.group <- str_trim(cld_df$.group)
+
+
+    stat_summary <- function(df){
+        stat <- df %>% group_by(Trt,Time) %>% 
+            dplyr::summarise( 
+                count = (dplyr::n()), 
+                mean = mean(IR, na.rm = TRUE), 
+                sd = sd(IR, na.rm = TRUE),
+                se = round(sd/sqrt(count),2),
+                mean_se = paste0(round(mean,2),"\u00b1", se, sep="")
+            )
+    }
+    
+    stat <- stat_summary(df)
+    m<-merge(cld_df, stat, by.x = c("Time","Trt"), by.y = c("Time","Trt"),all.x = TRUE)
+    m <- m %>% mutate(mean_se=paste0(mean_se,.group))
+}
+
+
+```
+
+
+
+# PR across time and conc. for SS
+```{r, echo=FALSE}
+# # Senna only
+rep_PR_ss_all$mean_se <- paste0(rep_PR_ss_all$mean,"\u00b1",rep_PR_ss_all$se,rep_PR_ss_all$.group)
+rep_PR_ss_all_1 <- rep_PR_ss_all %>% pivot_wider(id_cols = c("Trt"), names_from = "Time", values_from = "mean_se") 
+
+rep_PR_ss_all_1 <- data.frame(rep_PR_ss_all_1)
+rep_PR_ss_all_1  <- rep_PR_ss_all_1[c(8:6,2:5,1), ]
+
+print_table(rep_PR_ss_all_1)
+
+```
+
+
+# IR across time and conc. for SS
+```{r, echo=FALSE}
+
+# # Senna only
+rep_IR_ss_all <- create_rep_IR_cld_df(rep_PR_ss)
+rep_IR_ss_all$mean_se <- paste0(rep_IR_ss_all$mean,"\u00b1",rep_IR_ss_all$se,rep_IR_ss_all$.group)
+rep_IR_ss_all_1 <- rep_IR_ss_all %>% pivot_wider(id_cols = c("Trt"), names_from = "Time", values_from = "mean_se") 
+
+rep_IR_ss_all_1 <- data.frame(rep_IR_ss_all_1)
+rep_IR_ss_all_1  <- rep_IR_ss_all_1[c(8:6,2:5,1), ]
+
+rep_IR_ss_all_1
+
+```
+
+# Combined PR & IR for S.s
+
+```{r, echo=FALSE}
+
+suppressWarnings(out_ss_REP_APA <- Map(function(x, y) { 
+    paste(x, y)
+}, rep_PR_ss_all_1[2:7], rep_IR_ss_all_1[, 2:7]),classes = "warning")
+
+
+out_ss_REP_APA<-data.frame(Trt=rep_IR_ss_all_1$Trt,do.call(cbind,out_ss_REP_APA))
+
+print_table(out_ss_REP_APA)
+
+```
+
+
+# APA table for Repellence effects of Senna singueana
+```{r, echo=FALSE}
+apa_rep_ss <- data.frame(out_ss_REP_APA, PR=ss_PR_IR_APA$PR, IR=ss_PR_IR_APA$IR)
+
+apa_rep_ss <- data.frame(apa_rep_ss)
+# print a nice APA table
+print_table(apa_rep_ss)
+
+```
+
+
+
+# Plot of Mean Percentage Repellence for S. singueana
+```{r, echo=FALSE}
+
+ss_PR_APA <- ss_PR_IR_APA
+ss_PR_APA$Trt <- factor(ss_PR_APA$Trt,levels = c("Untreated","Solvent","2g","4g","6g","8g","10g","Actelic"),labels =  c("Untreated","Solvent","2g","4g","6g","8g","10g","Actelic"), ordered = TRUE) 
+
+bp_ss_av_PR <- ggbarplot(ss_PR_APA, x = "Trt", y = "PR_mean", fill = "Trt",  
+                       palette = "jco",position = position_dodge(0.8), ylab = "Mean repellence (%)", xlab = "Extract Concentration (g/100ml)",width = 0.95
+) +
+    geom_errorbar(aes(y = PR_mean,
+                      ymin = PR_mean - PR_se,
+                      ymax = PR_mean + PR_se),
+                  width = 0.05,position = position_dodge(0.8),vjust = 0)+ geom_text(aes(label = PR.group, y = PR_mean + PR_se), position = position_dodge(0.90),size=3,
+                                                                                    vjust=-0.5, hjust=0.55, colour = "gray25")+
+    theme(
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.background = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(),
+        axis.text.x = element_text(face="bold", size = 10),
+        plot.title = element_text(face="bold", size = 12),
+        axis.text.y = element_text(face="bold", size = 10),
+        axis.title = element_text(face="bold", size = 11),
+        legend.position="bottom",
+        legend.direction = "horizontal",
+        legend.key.size = unit(3.5, "mm"),
+        legend.title = element_blank(),
+        legend.spacing.x=unit(0.0,'mm'),
+        legend.spacing.y=unit(0.0,'mm')
+    )+ 
+    ylim(c(0,100))+
+    guides(fill=guide_legend(nrow = 1))
+
+
+bp_ss_av_PR
+
+```
+
+
+
+# Mean Repellent Index for S. singueana
+```{r, echo=FALSE}
+
+ss_IR_APA <- ss_PR_IR_APA[!ss_PR_IR_APA$Trt %in% c("Untreated","Solvent"), ]
+ss_IR_APA$Trt <- factor(ss_IR_APA$Trt,levels = c("2g","4g","6g","8g","10g","Actelic"),labels =  c("2g","4g","6g","8g","10g","Actelic"), ordered = TRUE) 
+
+bp_ss_av_IR <- ggbarplot(ss_IR_APA, x = "Trt", y = "IR_mean", fill = "Trt",  
+                       palette = "jco",position = position_dodge(0.8), ylab = "Mean repellent index", xlab = "Extract Concentration (g/100ml)",width = 0.95
+) +
+    geom_errorbar(aes(y = IR_mean,
+                      ymin = IR_mean - IR_se,
+                      ymax = IR_mean + IR_se),
+                  width = 0.05,position = position_dodge(0.8),vjust = 0)+ geom_text(aes(label = IR.group, y = IR_mean + IR_se), position = position_dodge(0.90),size=3,
+                                                                                    vjust=-0.5, hjust=0.55, colour = "gray25")+
+    theme(
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.background = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(),
+        axis.text.x = element_text(face="bold", size = 10),
+        plot.title = element_text(face="bold", size = 12),
+        axis.text.y = element_text(face="bold", size = 10),
+        axis.title = element_text(face="bold", size = 11),
+        legend.position="bottom",
+        legend.direction = "horizontal",
+        legend.key.size = unit(3.5, "mm"),
+        legend.title = element_blank(),
+        legend.spacing.x=unit(0.0,'mm'),
+        legend.spacing.y=unit(0.0,'mm')
+    )+ 
+    ylim(c(0,0.75))+
+    guides(fill=guide_legend(nrow = 1))
+
+
+bp_ss_av_IR
+
+```
+
+#=============================================================
+
+# Combined APA table for Repellent effects for C. volkensii
+## One-way ANOVA (overal means) for Trt using  Repellence Index (IR) dataframe
+## Use original dataframe (rep_df) with both "PR" and "IR" columns
+```{r, echo=FALSE}
+# PR stats
+overall_PR_cv<- rep_df %>% pivot_wider(id_cols = 1:3, names_from = Time, values_from = PR)
+overall_PR_cv <- overall_PR_cv[!overall_PR_cv$Plant %in% c("S_singueana", "Actellic_cv"),]
+#print_table(overall_PR_cv)
+
+## Mse table for individua IR of S. singueana across time
+overall_PR_cv<-overall_PR_cv[,-c(1,3)]
+
+
+overall_PR_cv$AV_PR  <- apply(overall_PR_cv[,c(2:7)], MARGIN=1, FUN=function(x) mean(x))
+
+
+overall_PR_cv_stats <- overall_PR_cv %>% group_by(Trt) %>% 
+    dplyr::summarise( 
+        count = (dplyr::n()), 
+        mean = mean(AV_PR, na.rm = TRUE), 
+        sd = sd(AV_PR, na.rm = TRUE),
+        se = round(sd/sqrt(count),2),
+        mean_se_cv = paste0(round(mean,2),"\u00b1", se, sep="")
+    )
+
+#print_table(overall_PR_ss_stats)
+
+
+
+overall_PR_cv_aov <- aov(AV_PR~Trt,overall_PR_cv)
+em_overall_PR_cv<-emmeans::emmeans(overall_PR_cv_aov, specs = "Trt")
+#em_Average_PR_ss
+
+CLD_overall_PR_cv <- cld(em_overall_PR_cv,adjust= 'sidak' ,Letters = letters ,alpha = 0.05 ,reversed =TRUE,decreasing = TRUE)
+CLD_overall_PR_cv <- data.frame(CLD_overall_PR_cv)
+CLD_overall_PR_cv <- CLD_overall_PR_cv[c(8,7,1,6:2), ]
+
+CLD_overall_PR_cv$SE <- overall_PR_cv_stats$se
+#print_table(CLD_overall_PR_cv)
+
+mse_overall_PR_cv <- data.frame(Trt=CLD_overall_PR_cv$Trt,
+mean = round(CLD_overall_PR_cv$emmean,2), 
+
+
+
+se= round(CLD_overall_PR_cv$SE,2),
+.group = CLD_overall_PR_cv$.group,
+mean_se=paste0(paste0(round(CLD_overall_PR_cv$emmean,2),"\u00b1", round(CLD_overall_PR_cv$SE,2)), CLD_overall_PR_cv$.group)) 
+
+# IR stats
+overall_IR_cv<- rep_df %>% pivot_wider(id_cols = 1:3, names_from = Time, values_from = IR)
+overall_IR_cv <- overall_IR_cv[!overall_IR_cv$Plant %in% c("S_singueana", "Actellic_cv"),]
+#print_table(overall_IR_cv)
+
+## Mse table for individua IR of S. singueana across time
+overall_IR_cv<-overall_IR_cv[,-c(1,3)]
+
+
+overall_IR_cv$AV_IR  <- apply(overall_IR_cv[,c(2:7)], MARGIN=1, FUN=function(x) mean(x))
+
+
+overall_IR_cv_stats <- overall_IR_cv %>% group_by(Trt) %>% 
+    dplyr::summarise( 
+        count = (dplyr::n()), 
+        mean = mean(AV_IR, na.rm = TRUE), 
+        sd = sd(AV_IR, na.rm = TRUE),
+        se = round(sd/sqrt(count),2),
+        mean_se_cv = paste0(round(mean,2),"\u00b1", se, sep="")
+    )
+
+#print_table(overall_IR_cv_stats)
+
+
+
+overall_IR_cv_aov <- aov(AV_IR~Trt,overall_IR_cv)
+em_overall_IR_cv<-emmeans::emmeans(overall_IR_cv_aov, specs = "Trt")
+#em_Average_PR_ss
+
+CLD_overall_IR_cv <- cld(em_overall_IR_cv,adjust= 'sidak' ,Letters = letters ,alpha = 0.05 ,reversed =TRUE,decreasing = TRUE)
+CLD_overall_IR_cv <- data.frame(CLD_overall_IR_cv)
+CLD_overall_IR_cv <- CLD_overall_IR_cv[c(1,2,8,3:7), ]
+
+CLD_overall_IR_cv$SE <- overall_IR_cv_stats$se
+#print_table(CLD_overall_IR_cv)# Use this for plotting mean ± se graphs
+
+
+mse_overall_IR_cv <- data.frame(Trt=CLD_overall_IR_cv$Trt,
+mean = round(CLD_overall_IR_cv$emmean,2),                               
+se= round(CLD_overall_IR_cv$SE,2),
+.group = CLD_overall_IR_cv$.group,
+mean_se=paste0(paste0(round(CLD_overall_IR_cv$emmean,2),"\u00b1", round(CLD_overall_IR_cv$SE,2)), CLD_overall_IR_cv$.group)) 
+
+cv_PR_IR_APA <- data.frame(Trt=mse_overall_PR_cv$Trt,
+                          PR_mean=mse_overall_PR_cv$mean,
+                          PR_se=mse_overall_PR_cv$se,
+                          PR.group=mse_overall_PR_cv$.group, IR_mean=mse_overall_IR_cv$mean,
+                          IR_se=mse_overall_IR_cv$se,
+                          IR.group=mse_overall_IR_cv$.group,
+                          PR=mse_overall_PR_cv$mean_se, IR=mse_overall_IR_cv$mean_se) 
+
+print_table(cv_PR_IR_APA)
+
+#write.csv(ss_PR_IR_APA, "mean_PR_and_IR_for_senna.csv",row.names = FALSE)
+
+```
+
+
+# PR across time and conc. for C.v
+```{r, echo=FALSE}
+# # Senna only
+rep_PR_cv_all$mean_se <- paste0(rep_PR_cv_all$mean,"\u00b1",rep_PR_cv_all$se,rep_PR_cv_all$.group)
+rep_PR_cv_all_1 <- rep_PR_cv_all %>% pivot_wider(id_cols = c("Trt"), names_from = "Time", values_from = "mean_se") 
+
+rep_PR_cv_all_1 <- data.frame(rep_PR_cv_all_1)
+rep_PR_cv_all_1  <- rep_PR_cv_all_1[c(8:6,2:5,1), ]
+
+rep_PR_cv_all_1
+
+```
+
+
+# IR across time and conc. for SS
+```{r, echo=FALSE}
+
+# # Senna only
+rep_IR_cv_all <- create_rep_IR_cld_df(rep_PR_cv)
+rep_IR_cv_all$mean_se <- paste0(rep_IR_cv_all$mean,"\u00b1",rep_IR_cv_all$se,rep_IR_cv_all$.group)
+rep_IR_cv_all_1 <- rep_IR_cv_all %>% pivot_wider(id_cols = c("Trt"), names_from = "Time", values_from = "mean_se") 
+
+rep_IR_cv_all_1 <- data.frame(rep_IR_cv_all_1)
+rep_IR_cv_all_1  <- rep_IR_cv_all_1[c(8:6,2:5,1), ]
+
+rep_IR_cv_all_1
+
+```
+
+# Combined PR & IR for S.s
+
+```{r, echo=FALSE}
+
+suppressWarnings(out_cv_REP_APA <- Map(function(x, y) { 
+    paste(x, y)
+}, rep_PR_cv_all_1[2:7], rep_IR_cv_all_1[, 2:7]),classes = "warning")
+
+
+out_cv_REP_APA<-data.frame(do.call(cbind,out_cv_REP_APA))
+
+out_cv_REP_APA
+
+```
+
+
+# APA table for Repellence effects of Senna singueana
+```{r, echo=FALSE}
+apa_rep_cv <- data.frame(Trt=rep_IR_cv_all_1$Trt, out_cv_REP_APA, PR=cv_PR_IR_APA$PR, IR=cv_PR_IR_APA$IR)
+
+apa_rep_cv <- data.frame(apa_rep_cv)
+# print a nice APA table
+print_table(apa_rep_cv)
+
+```
+
+
+
+
+
+# Mean Percentage Repellence for C. volkensii
+```{r, echo=FALSE}
+
+cv_PR_APA <- cv_PR_IR_APA
+cv_PR_APA$Trt <- factor(cv_PR_APA$Trt,levels = c("Untreated","Solvent","2g","4g","6g","8g","10g","Actelic"),labels =  c("Untreated","Solvent","2g","4g","6g","8g","10g","Actelic"), ordered = TRUE)
+
+bp_cv_av_PR <- ggbarplot(cv_PR_APA, x = "Trt", y = "PR_mean", fill = "Trt",  
+                       palette = "jco",position = position_dodge(0.8), ylab = "Mean repellence (%)", xlab = "Extract Concentration (g/100ml)",width = 0.95
+) +
+    geom_errorbar(aes(y = PR_mean,
+                      ymin = PR_mean - PR_se,
+                      ymax = PR_mean + PR_se),
+                  width = 0.05,position = position_dodge(0.8),vjust = 0)+ geom_text(aes(label = PR.group, y = PR_mean + PR_se), position = position_dodge(0.90),size=3,
+                                                                                    vjust=-0.5, hjust=0.55, colour = "gray25")+
+    theme(
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.background = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(),
+        axis.text.x = element_text(face="bold", size = 10),
+        plot.title = element_text(face="bold", size = 12),
+        axis.text.y = element_text(face="bold", size = 10),
+        axis.title = element_text(face="bold", size = 11),
+        legend.position="bottom",
+        legend.direction = "horizontal",
+        legend.key.size = unit(3.5, "mm"),
+        legend.title = element_blank(),
+        legend.spacing.x=unit(0.0,'mm'),
+        legend.spacing.y=unit(0.0,'mm')
+    )+ 
+    ylim(c(0,100))+
+    guides(fill=guide_legend(nrow = 1))
+
+
+bp_cv_av_PR
+
+```
+
+
+
+# Mean Repellent Index for S. singueana
+```{r, echo=FALSE}
+
+cv_IR_APA <- cv_PR_IR_APA[!cv_PR_IR_APA$Trt %in% c("Untreated","Solvent"), ]
+cv_IR_APA$Trt <- factor(cv_IR_APA$Trt,levels = c("2g","4g","6g","8g","10g","Actelic"),labels =  c("2g","4g","6g","8g","10g","Actelic"), ordered = TRUE)
+
+bp_cv_av_IR <- ggbarplot(cv_IR_APA, x = "Trt", y = "IR_mean", fill = "Trt",  
+                       palette = "jco",position = position_dodge(0.8), ylab = "Mean repellent index", xlab = "Extract Concentration (g/100ml)",width = 0.95
+) +
+    geom_errorbar(aes(y = IR_mean,
+                      ymin = IR_mean - IR_se,
+                      ymax = IR_mean + IR_se),
+                  width = 0.05,position = position_dodge(0.8),vjust = 0)+ geom_text(aes(label = IR.group, y = IR_mean + IR_se), position = position_dodge(0.90),size=3,
+                                                                                    vjust=-0.5, hjust=0.55, colour = "gray25")+
+    theme(
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.background = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(),
+        axis.text.x = element_text(face="bold", size = 10),
+        plot.title = element_text(face="bold", size = 12),
+        axis.text.y = element_text(face="bold", size = 10),
+        axis.title = element_text(face="bold", size = 11),
+        legend.position="bottom",
+        legend.direction = "horizontal",
+        legend.key.size = unit(3.5, "mm"),
+        legend.title = element_blank(),
+        legend.spacing.x=unit(0.0,'mm'),
+        legend.spacing.y=unit(0.0,'mm')
+    )+ 
+    ylim(c(0,1))+
+    guides(fill=guide_legend(nrow = 1))
+
+
+bp_cv_av_IR
+
+```
+
+
+
+
+####REP BOTH AND FACeted
+## COMPARISON USING t-test
+# t-test comparison for toxicity of both Ss and Cv
+```{r, echo=FALSE}
+tox_both <- rep_df[!rep_df$Plant %in% c("Actellic_ss", "Actellic_cv"),]
+
+# Change levels names for Plant column
+tox_both <- tox_both %>% mutate(Plant = case_when(
+    Plant == "C_volkensii" ~ "C. volkensii",
+    Plant == "S_singueana" ~ "S. singueana"
+))
+
+tox_both$Time <- factor(tox_both$Time, levels = c("1hr","2hr","3hr","4hr","5hr","6hr"),labels = c("1hr","2hr","3hr","4hr","5hr","6hr"),ordered = TRUE)
+
+
+
+# Function to create summaries
+create_tt_rep_df <- function(df){
+    
+    run_tTest <- function(df_obj){
+        df_obj %>%
+            group_by(Trt,Time) %>%
+            t_test(PR ~ Plant, paired = FALSE) %>%
+            adjust_pvalue(method = "BH") %>%
+            add_significance() %>% add_xy_position()
+    }
+
+#create the summaries    
+tt <- run_tTest(df)
+    
+    run_summary <- function(df_obj){
+        obj_tt <- Rmisc::summarySE(df_obj, measurevar = "PR", groupvars = c("Plant","Trt","Time"), na.rm = TRUE)
+    }
+    
+    sum <- run_summary(df)
+    
+    return(list("t-test_df"=tt,"summary_df"=sum))
+    
+}
+
+# Actual summaries
+ts<-create_tt_rep_df(tox_both)
+
+
+
+tt_rep_plot <- ggplot(ts$summary_df, aes(x = Trt, y = PR)) +
+    geom_bar(aes(fill = Plant),stat = "identity", position = position_dodge(0.8),width = 0.7) + facet_wrap(~Time, scales = "free_x",nrow = 1,strip.position = "bottom", labeller= facet_labels)+ geom_errorbar(aes(group=Plant,y=PR, ymin= PR - se, ymax=PR+se),data = ts$summary_df,position = position_dodge(0.8),width=0.4)+ 
+    theme(strip.placement = "outside")+ 
+    scale_y_continuous(expand = c(0,0))+
+    theme(
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.background = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.text = element_text(face = "italic"),
+        axis.line = element_line(),
+        legend.title = element_blank(),
+        legend.key.size = unit(.35, 'cm'),
+        legend.position = "bottom"
+    ) +
+    scale_fill_manual(values = c("#4DAF4A","dodgerblue4"))+
+    
+    stat_pvalue_manual(
+        ts$`t-test_df`, x = "Trt", y.position = ts$`t-test_df`$y.position,
+        label = "p.adj.signif",
+        position = position_dodge(0.8),size = 2.0
+    ) 
+
+ggpar(tt_rep_plot, xlab = "Extract concentration (g/100ml) and Time (hrs)", ylab = "Repellence (%)",ylim = c(0,120))
+
+
+```
+
+
+
+
+#####################################################################################################
+
+
+# OVIPOSITION DETERENCE
+
+```{r, echo=FALSE}
+ovi<-read.csv("oviposition_deterence.csv")
+ovi$Tn<-apply(ovi[,c(3:12)],1,sum)
+ovi$Cn<-rep((floor(sum(ovi$Tn[1:4])/4)),nrow(ovi))
+ovi<-ovi[,c(1,2,13,14)]
+ovi$OD <- ((ovi$Cn-ovi$Tn)/(ovi$Cn+ovi$Tn)*100)
+ovi$Tn[1:4] <- ovi$Cn[1:4]
+
+ovi$Trt <- factor(ovi$Trt, levels = c("Untreated","Solvent","2g", "4g", "6g", "8g", "10g","Actelic"), labels = c("Untreated","Solvent","2g", "4g", "6g", "8g", "10g","Actelic") ,ordered = TRUE)
+ovi$Group <- factor(ovi$Group)
+print_table(ovi)
+
+ 
+```
+
+
+
+# Plot of oviposition effect for S. singueana
+```{r, echo=FALSE}
+
+od_df_ss <- ovi[!ovi$Group %in% "Cv", ]
+
+ss_od_stats <- od_df_ss %>% group_by(Trt) %>% 
+    dplyr::summarise( 
+        count = (dplyr::n()), 
+        mean = mean(OD, na.rm = TRUE), 
+        sd = sd(OD, na.rm = TRUE),
+        se = round(sd/sqrt(count),2),
+        mean_se_ss = paste0(round(mean,2),"\u00b1", se, sep="")
+    )
+
+
+print_table(ss_od_stats)
+
+
+ss_ovi_anov <- aov(OD ~ Trt, data = od_df_ss)
+
+em_ovi_ss<- emmeans::emmeans(ss_ovi_anov, specs = "Trt")
+CLD_ovi_ss_letters <- cld(em_ovi_ss,adjust= 'sidak' # adjusting p-values using sidak method
+                      ,Letters = letters # grouping with small letters
+                      ,alpha = 0.05 # your significance level
+                      ,reversed = TRUE,decreasing = TRUE) # sort means if larger means are desired
+
+CLD_ovi_ss_letters <- CLD_ovi_ss_letters[c(8,7,1,6:2),]
+CLD_ovi_ss_letters$SE <- ss_od_stats$se
+
+CLD_ovi_ss_letters <- CLD_ovi_ss_letters %>% mutate(emmean=ifelse(emmean< 0, 0, emmean))
+
+print_table(CLD_ovi_ss_letters)
+
+```
+
+
+
+```{r, echo=FALSE}
+ovi_ss_APA <- data.frame(Trt=CLD_ovi_ss_letters$Trt, OD=paste0(round(CLD_ovi_ss_letters$emmean,2),"\u00b1",round(CLD_ovi_ss_letters$SE,2),CLD_ovi_ss_letters$.group))
+
+print_table(ovi_ss_APA)
+
+#write.csv(ovi_ss_APA, "oviposition_deterrence_senna.csv")
+
+```
+
+
+# Oviposition deterence for S. singueana
+```{r, echo=FALSE}
+
+ss_ovi_data <- data.frame(CLD_ovi_ss_letters)
+
+#CLD_ovi_ss_letters <- CLD_ovi_ss_letters[c(1,2,8,3:7), ]
+
+bxp_od_ss <- ggbarplot(ss_ovi_data, x = "Trt", y = "emmean", fill = "Trt",  
+                    palette = "jco",position = position_dodge(0.8),add.params = list(group = "Trt"),ylab = "Oviposition deterrence (%)", xlab = "Extract Concentration (g/100ml)",width = 0.95
+) +
+    scale_y_continuous(breaks = seq(0,110, by=5),expand = c(0,0))+
+    geom_errorbar(aes(group=Trt,y = emmean,
+                      ymin = emmean - SE,
+                      ymax = emmean + SE),
+                  width = 0.05,position = position_dodge(0.8),vjust = 0)+ geom_text(aes(group=Trt,label = .group, y = emmean + SE), position = position_dodge(0.90),size=3,
+                                                                                    vjust=-0.5, hjust=0.55, colour = "gray25")+
+    theme(
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.background = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(),
+        axis.text.x = element_text(face="bold", size = 10),
+        plot.title = element_text(face="bold", size = 12),
+        axis.text.y = element_text(face="bold", size = 10),
+        axis.title = element_text(face="bold", size = 11),
+        legend.position="bottom",
+        legend.direction = "horizontal",
+        legend.key.size = unit(3.5, "mm"),
+        legend.title = element_blank(),
+        legend.spacing.x=unit(0.0,'mm'),
+        legend.spacing.y=unit(0.0,'mm')
+    )+ 
+    ylim(c(0,110))+
+    guides(fill=guide_legend(nrow = 1))
+
+
+bxp_od_ss <- bxp_od_ss +  guides(col = guide_legend(override.aes=list(nrow = 1, theme = theme(legend.byrow = TRUE))))
+
+ggpar(bxp_od_ss, legend = "bottom", legend.title = "")
+
+
+```
+
+
+
+
+
+# oviposition means and compact letters fo C. volkensii
+```{r, echo=FALSE}
+od_df_cv <- ovi[!ovi$Group %in% "Ss", ]
+
+cv_od_stats <- od_df_cv %>% group_by(Trt) %>% 
+    dplyr::summarise( 
+        count = (dplyr::n()), 
+        mean = mean(OD, na.rm = TRUE), 
+        sd = sd(OD, na.rm = TRUE),
+        se = round(sd/sqrt(count),2),
+        mean_se_ss = paste0(round(mean,2),"\u00b1", se, sep="")
+    )
+
+print_table(cv_od_stats)
+
+
+cv_ovi_anov <- aov(OD ~ Trt, data = od_df_cv)
+
+em_ovi_cv<- emmeans::emmeans(cv_ovi_anov, specs = "Trt")
+CLD_ovi_cv_letters <- cld(em_ovi_cv,adjust= 'sidak' # adjusting p-values using sidak method
+                      ,Letters = letters # grouping with small letters
+                      ,alpha = 0.05 # your significance level
+                      ,reversed = TRUE,decreasing = TRUE) # sort means if larger means are desired
+
+CLD_ovi_cv_letters <- CLD_ovi_cv_letters[c(8,7,1,6:2),]
+
+CLD_ovi_cv_letters$SE <- cv_od_stats$se
+CLD_ovi_cv_letters <- CLD_ovi_cv_letters %>% mutate(emmean=ifelse(emmean< 0, 0, emmean))
+
+print_table(CLD_ovi_cv_letters)
+
+```
+
+
+
+```{r, echo=FALSE}
+ovi_cv_APA <- data.frame(Trt=CLD_ovi_cv_letters$Trt, OD=paste0(round(CLD_ovi_cv_letters$emmean,2),"\u00b1",round(CLD_ovi_cv_letters$SE,2),CLD_ovi_cv_letters$.group))
+
+print_table(ovi_cv_APA)
+
+#write.csv(ovi_cv_APA, "oviposition_deterrence_caesalpinia.csv")
+
+```
+
+# Oviposition deterence for Cv
+```{r,echo=FALSE}
+
+cv_ovi_data <- data.frame(CLD_ovi_cv_letters)
+
+bxp_od_cv <- ggbarplot(cv_ovi_data, x = "Trt", y = "emmean", fill = "Trt",  
+                    palette = "jco",position = position_dodge(0.8),add.params = list(group = "Trt"),ylab = "Oviposition deterrence (%)", xlab = "Extract Concentration (g/100ml)",width = 0.95
+) +
+    scale_y_continuous(breaks = seq(0,110, by=5),expand = c(0,0))+
+    geom_errorbar(aes(group=Trt,y = emmean,
+                      ymin = emmean - SE,
+                      ymax = emmean + SE),
+                  width = 0.05,position = position_dodge(0.8),vjust = 0)+ geom_text(aes(group=Trt,label = .group, y = emmean + SE), position = position_dodge(0.90),size=3,
+                                                                                    vjust=-0.5, hjust=0.55, colour = "gray25")+
+    theme(
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.background = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(),
+        axis.text.x = element_text(face="bold", size = 10),
+        plot.title = element_text(face="bold", size = 12),
+        axis.text.y = element_text(face="bold", size = 10),
+        axis.title = element_text(face="bold", size = 11),
+        legend.position="bottom",
+        legend.direction = "horizontal",
+        legend.key.size = unit(3.5, "mm"),
+        legend.title = element_blank(),
+        legend.spacing.x=unit(0.0,'mm'),
+        legend.spacing.y=unit(0.0,'mm')
+    )+ 
+    ylim(c(0,110))+
+    guides(fill=guide_legend(nrow = 1))
+
+
+bxp_od_cv <- bxp_od_cv +  guides(col = guide_legend(override.aes=list(nrow = 1, theme = theme(legend.byrow = TRUE))))
+
+ggpar(bxp_od_cv, legend = "bottom", legend.title = "")
+
+
+```
+
+
+
+# t-test Comparison of oviposition deterrence between treatment levels of both plant
+```{r, echo=FALSE}
+tTest_od_df_ss <- od_df_ss[!od_df_ss$Trt %in% c("Solvent only","Actelic"),]
+tTest_od_df_cv <- od_df_cv[!od_df_cv$Trt %in% c("Solvent only","Actelic"),]
+tTest_od_df <- rbind(tTest_od_df_ss,tTest_od_df_cv)
+print_table(tTest_od_df)
+
+tTest_od_df$Group <- as.factor(tTest_od_df$Group)
+# Comparisons against reference
+od.stat.test <- compare_means(
+    OD ~ Group, data = tTest_od_df, group.by = "Trt",
+    method = "t.test"
+)
+
+print_table(od.stat.test)
+
+tTest_od_df <- tTest_od_df %>% mutate(Group = case_when(
+    Group == "Cv" ~ "C. volkensii",
+    Group == "Ss" ~ "S. singueana"
+))
+
+# Plot
+bp_od_both <- ggbarplot(tTest_od_df, x = "Trt", y = "OD",
+                fill = "Group", palette = "jco",
+                add = "mean_sd", add.params = list(group = "Group"),
+                position = position_dodge(0.8),xlab="Extract concentration (g/100ml)",ylab = "Oviposition deterrence (%)")+
+    theme(
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.background = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.text = element_text(face = "italic"),
+        axis.line = element_line(),
+        legend.title = element_blank(),
+        legend.key.size = unit(.35, 'cm'),
+        legend.position = "bottom"
+    ) +
+      geom_bracket(
+        data = od.stat.test,
+        aes(xmin = Trt, xmax = Trt,
+            y.position = c(26,44,67,83,94)),
+        label = "",#paste("p=",od.stat.test$p.format)
+        bracket_width = 0.5,    # Adjust width of the bracket
+        bracket.shorten = 0.1,  # Control the shortening of the bracket
+        inherit.aes = FALSE  # We don't want to inherit the main aes() from ggplot
+        ) +
+      theme_pubr(
+       base_size = 12,
+       base_family = "",
+       border = FALSE,
+       margin = TRUE,
+       legend = "bottom",
+       x.text.angle = 0
+      )+ 
+  stat_pvalue_manual(
+    od.stat.test, x = "Trt", y.position = c(28,46,69,85,96),
+    label = "p.signif",
+    position = position_dodge(0.8)
+)
+
+ggpar(bp_od_both, legend.title = "")
+
+
+```
+
+
+
+
+
+
+
+# F1 Progeny inhibition Assay
+```{r, echo=FALSE}
+f1 <- read.csv("f1_progeny_inhibition.csv")
+###(f1)
+
+f2 <- f1 %>% mutate(Inhibition_rate=((Emerged_Ctrl-Emerged_Trt)/Emerged_Ctrl)*100)
+f2$Trt <- factor(f2$Trt, levels = c("Untreated","Solvent","Actelic","2g","4g","6g","8g","10g"), ordered = TRUE)
+f2$Group<-factor(f2$Group, levels = c("Untreated control","Solvent control","Positive control","Ss","Cv"), ordered = TRUE)
+#suppressWarnings(f4 <- melt( f3, id=1:2, names(f2)[8] ),classes = "warning")
+print_table(f2)
+
+```
+
+
+
+```{r, echo=FALSE}
+f2$Trt <- factor(f2$Trt,levels = c("Untreated","Solvent","Actelic","2g","4g","6g","8g","10g"),ordered = TRUE)
+
+f1_df_ss <- f2[!f2$Group %in% "Cv", ]
+f1_df_cv <- f2[!f2$Group %in% "Ss", ]
+
+```
+
+
+
+# Emmeans for S. singueana
+```{r, echo=FALSE}
+
+f1_ss_stats <- f1_df_ss %>% group_by(Trt) %>% 
+    dplyr::summarise( 
+        count = (dplyr::n()), 
+        mean = mean(Inhibition_rate, na.rm = TRUE), 
+        sd = sd(Inhibition_rate, na.rm = TRUE),
+        se = round(sd/sqrt(count),2),
+        mean_se_ss = paste0(round(mean,2),"\u00b1", se, sep="")
+    )
+
+print_table(f1_ss_stats)
+
+
+f1_ss_anov <- aov(Inhibition_rate ~ Trt, data = f1_df_ss)
+
+em_f1_ss<- emmeans::emmeans(f1_ss_anov, specs = "Trt")
+CLD_f1_ss_letters_rep_PR <- cld(em_f1_ss,adjust= 'sidak' # adjusting p-values using sidak method
+                      ,Letters = letters # grouping with small letters
+                      ,alpha = 0.05 # your significance level
+                      ,reversed = TRUE,decreasing = TRUE) # sort means if larger means are desired
+
+CLD_f1_ss_letters_rep_PR <- CLD_f1_ss_letters_rep_PR[c(8,7,1,6:2),]
+CLD_f1_ss_letters_rep_PR$SE <- f1_ss_stats$se
+CLD_f1_ss_letters_rep_PR <- CLD_f1_ss_letters_rep_PR %>% mutate(emmean=ifelse(emmean < 0, 0, emmean))
+
+print_table(CLD_f1_ss_letters_rep_PR) 
+
+```
+
+
+# APA table for Ss
+```{r, echo=FALSE}
+f1_ss_APA <- data.frame(Trt=CLD_f1_ss_letters_rep_PR$Trt, Inhibition=paste0(round(CLD_f1_ss_letters_rep_PR$emmean,2),"\u00b1",round(CLD_f1_ss_letters_rep_PR$SE,2),CLD_f1_ss_letters_rep_PR$.group))
+
+print_table(f1_ss_APA)
+
+```
+
+
+
+# Plot of F1 inhibition effects of S. singueana
+```{r, echo=FALSE}
+CLD_f1_ss_letters_rep_PR <- data.frame(CLD_f1_ss_letters_rep_PR)
+CLD_f1_ss_letters_rep_PR$.group <- trimws(CLD_f1_ss_letters_rep_PR$.group)
+CLD_f1_ss_letters_rep_PR<- CLD_f1_ss_letters_rep_PR[!CLD_f1_ss_letters_rep_PR$Trt %in% c("Solvent control"), ]
+
+CLD_f1_ss_letters_rep_PR$Trt <- factor(CLD_f1_ss_letters_rep_PR$Trt,levels = c("Untreated","Solvent","2g","4g","6g","8g","10g","Actelic"),labels =  c("Untreated","Solvent","2g","4g","6g","8g","10g","Actelic"), ordered = TRUE) 
+
+bxp_f1_ss <- ggbarplot(CLD_f1_ss_letters_rep_PR, x = "Trt", y = "emmean", fill = "Trt",  
+                    palette = "jco",position = position_dodge(0.8),add.params = list(group = "Trt"),ylab = "Inhibition rate (%)", xlab = "Extract Concentration (g/100ml)",width = 0.95
+) +
+    scale_y_continuous(breaks = seq(0,110, by=5),expand = c(0,0))+
+    geom_errorbar(aes(group=Trt,y = emmean,
+                      ymin = emmean - SE,
+                      ymax = emmean + SE),
+                  width = 0.05,position = position_dodge(0.8),vjust = 0)+ geom_text(aes(group=Trt,label = .group, y = emmean + SE), position = position_dodge(0.90),size=3,
+                                                                                    vjust=-0.5, hjust=0.55, colour = "gray25")+
+    theme(
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.background = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(),
+        axis.text.x = element_text(face="bold", size = 10),
+        plot.title = element_text(face="bold", size = 12),
+        axis.text.y = element_text(face="bold", size = 10),
+        axis.title = element_text(face="bold", size = 11),
+        legend.position="bottom",
+        legend.direction = "horizontal",
+        legend.key.size = unit(3.5, "mm"),
+        legend.title = element_blank(),
+        legend.spacing.x=unit(0.0,'mm'),
+        legend.spacing.y=unit(0.0,'mm')
+    )+ 
+    ylim(c(0,110))+
+    guides(fill=guide_legend(nrow = 1))
+
+
+ggpar(bxp_f1_ss, legend = "bottom", legend.title = "")
+
+
+```
+
+
+
+# Emmeans for C. volkensii
+```{r, echo=FALSE}
+
+f1_cv_stats <- f1_df_cv %>% group_by(Trt) %>% 
+    dplyr::summarise( 
+        count = (dplyr::n()), 
+        mean = mean(Inhibition_rate, na.rm = TRUE), 
+        sd = sd(Inhibition_rate, na.rm = TRUE),
+        se = round(sd/sqrt(count),2),
+        mean_se_ss = paste0(round(mean,2),"\u00b1", se, sep="")
+    )
+
+print_table(f1_cv_stats)
+
+
+f1_cv_anov <- aov(Inhibition_rate ~ Trt, data = f1_df_cv)
+
+em_f1_cv<- emmeans::emmeans(f1_cv_anov, specs = "Trt")
+CLD_f1_cv_letters_rep_PR <- cld(em_f1_cv,adjust= 'sidak' # adjusting p-values using sidak method
+                      ,Letters = letters # grouping with small letters
+                      ,alpha = 0.05 # your significance level
+                      ,reversed = TRUE,decreasing = TRUE) # sort means if larger means are desired
+
+CLD_f1_cv_letters_rep_PR <- CLD_f1_cv_letters_rep_PR[c(8,7,1,6:2),]
+CLD_f1_cv_letters_rep_PR$SE <- f1_cv_stats$se
+
+CLD_f1_cv_letters_rep_PR <- CLD_f1_cv_letters_rep_PR %>% mutate(emmean=ifelse(emmean < 0, 0, emmean))
+
+print_table(CLD_f1_cv_letters_rep_PR) 
+
+```
+
+
+# APA table for Cv
+```{r, echo=FALSE}
+f1_cv_APA <- data.frame(Trt=CLD_f1_cv_letters_rep_PR$Trt, Inhibition=paste0(round(CLD_f1_cv_letters_rep_PR$emmean,2),"\u00b1",round(CLD_f1_cv_letters_rep_PR$SE,2),CLD_f1_cv_letters_rep_PR$.group))
+
+print_table(f1_cv_APA)
+
+```
+
+
+
+# Plot of F1 Inhibition effects of C. volkensii
+```{r, echo=FALSE}
+CLD_f1_cv_letters_rep_PR <- data.frame(CLD_f1_cv_letters_rep_PR)
+CLD_f1_cv_letters_rep_PR$.group <- trimws(CLD_f1_cv_letters_rep_PR$.group)
+CLD_f1_cv_letters_rep_PR<- CLD_f1_cv_letters_rep_PR[!CLD_f1_cv_letters_rep_PR$Trt %in% c("Solvent control"), ]
+
+CLD_f1_cv_letters_rep_PR$Trt <- factor(CLD_f1_cv_letters_rep_PR$Trt,levels = c("Untreated","Solvent","2g","4g","6g","8g","10g","Actelic"),labels =  c("Untreated","Solvent","2g","4g","6g","8g","10g","Actelic"), ordered = TRUE) 
+
+bxp_f1_cv <- ggbarplot(CLD_f1_cv_letters_rep_PR, x = "Trt", y = "emmean", fill = "Trt",  
+                    palette = "jco",position = position_dodge(0.8),add.params = list(group = "Trt"),ylab = "Inhibition Rate (%)", xlab = "Extract Concentration (g/100ml)",width = 0.95
+) +
+    scale_y_continuous(breaks = seq(0,110, by=5),expand = c(0,0))+
+    geom_errorbar(aes(group=Trt,y = emmean,
+                      ymin = emmean - SE,
+                      ymax = emmean + SE),
+                  width = 0.05,position = position_dodge(0.8),vjust = 0)+ geom_text(aes(group=Trt,label = .group, y = emmean + SE), position = position_dodge(0.90),size=3,
+                                                                                    vjust=-0.5, hjust=0.55, colour = "gray25")+
+    theme(
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.background = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(),
+        axis.text.x = element_text(face="bold", size = 10),
+        plot.title = element_text(face="bold", size = 12),
+        axis.text.y = element_text(face="bold", size = 10),
+        axis.title = element_text(face="bold", size = 11),
+        legend.position="bottom",
+        legend.direction = "horizontal",
+        legend.key.size = unit(3.5, "mm"),
+        legend.title = element_blank(),
+        legend.spacing.x=unit(0.0,'mm'),
+        legend.spacing.y=unit(0.0,'mm')
+    )+ 
+    ylim(c(0,110))+
+    guides(fill=guide_legend(nrow = 1))
+
+
+ggpar(bxp_f1_cv, legend = "bottom", legend.title = "")
+
+
+```
+
+
+
+
+
+
+```{r, echo=FALSE}
+tTest_f1_ss <- f1_df_ss
+tTest_f1_ss <- tTest_f1_ss[!tTest_f1_ss$Trt %in% c("Solvent control","Actelic"),]
+print_table(tTest_f1_ss)
+
+t_test_results_f1_ss <- tTest_f1_ss %>%
+    group_by(Trt) %>%
+    summarise(
+        t_test_comparisons = list(
+            combn(unique(Trt), 2, simplify = FALSE) %>%
+                map(~ {
+                    # Perform t-test between two time points
+                    t_test <- t.test(
+                        Inhibition_rate[Trt == .x[1]], 
+                        Inhibition_rate[Trt == .x[2]]
+                    )
+                    # Return a tibble with the comparison, p-value, and statistic
+                    tibble(
+                        Trt1 = .x[1],
+                        Trt2 = .x[2],
+                        p_value = t_test$p.value,
+                        statistic = t_test$statistic
+                    )
+                })
+        )
+    ) %>%
+    unnest(t_test_comparisons)
+
+# View the t-test results
+print_table(t_test_results_f1_ss)
+
+library(tidyr)
+
+# Assuming you have already performed the t-tests and unnested the results
+# Here's an example based on the previous code:
+
+# Prepare the data for plotting
+# Unnest the t-test results to flatten the list-column into individual rows
+t_test_results_flat_f1_ss <- t_test_results_f1_ss %>%
+    unnest(t_test_comparisons)
+
+print_table(t_test_results_flat_f1_ss)
+
+# Plotting the t-test results
+tt_plot_f1_ss <- ggplot(t_test_results_flat_f1_ss, aes(x = interaction(Trt1, Trt2), y = p_value, fill = p_value < 0.05)) +
+    #geom_point(size = 4) + # Plot points for each comparison
+    geom_bar(stat = "identity")+
+    theme_minimal() +
+    labs(
+        title = "Pairwise t-test Comparisons between Timepoints. (S. singueana)",
+        x = "Extract concentration (g/100ml)",
+        y = "p-value",
+        color = "Significant"
+    ) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotate x-axis labels for clarity
+    scale_fill_manual(values = c("#073763", "orange3")) +  # Color points based on significance
+    geom_hline(yintercept = 0.05, linetype = "dashed", color = "black")
+
+
+tt_plot_f1_ss
+```
+
+
+
+
+
+
+
+
+
+
+```{r, echo=FALSE}
+tTest_f1_cv <- f1_df_cv
+tTest_f1_cv <- tTest_f1_cv[!tTest_f1_cv$Trt %in% c("Solvent control","Actelic"),]
+print_table(tTest_f1_cv)
+
+t_test_results_f1_cv <- tTest_f1_cv %>%
+    group_by(Trt) %>%
+    summarise(
+        t_test_comparisons = list(
+            combn(unique(Trt), 2, simplify = FALSE) %>%
+                map(~ {
+                    # Perform t-test between two time points
+                    t_test <- t.test(
+                        Inhibition_rate[Trt == .x[1]], 
+                        Inhibition_rate[Trt == .x[2]]
+                    )
+                    # Return a tibble with the comparison, p-value, and statistic
+                    tibble(
+                        Trt1 = .x[1],
+                        Trt2 = .x[2],
+                        p_value = t_test$p.value,
+                        statistic = t_test$statistic
+                    )
+                })
+        )
+    ) %>%
+    unnest(t_test_comparisons)
+
+# View the t-test results
+print_table(t_test_results_f1_cv)
+
+
+library(tidyr)
+
+# Assuming you have already performed the t-tests and unnested the results
+# Here's an example based on the previous code:
+
+# Prepare the data for plotting
+# Unnest the t-test results to flatten the list-column into individual rows
+t_test_results_flat_f1_cv <- t_test_results_f1_cv %>%
+    unnest(t_test_comparisons)
+
+
+print_table(t_test_results_flat_f1_cv)
+
+# Plotting the t-test results
+tt_plot_f1_cv <- ggplot(t_test_results_flat_f1_cv, aes(x = interaction(Trt1, Trt2), y = p_value, fill = p_value < 0.05)) +
+    #geom_point(size = 4) + # Plot points for each comparison
+    geom_bar(stat = "identity")+
+    theme_minimal() +
+    labs(
+        title = "Pairwise t-test Comparisons between extract conc. (C. volkensii)",
+        x = "Extract concentration (g/100ml)",
+        y = "p-value",
+        color = "Significant"
+    ) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotate x-axis labels for clarity
+    scale_fill_manual(values = c("#073763", "orange3")) +  # Color points based on significance
+    geom_hline(yintercept = 0.05, linetype = "dashed", color = "black")
+
+tt_plot_f1_cv
+
+```
+
+
+
+
+# plot of F1 Inhibition rate (%) for Both plants
+```{r, echo=FALSE}
+tTest_f1_df <- rbind(f1_df_ss,f1_df_cv)
+tTest_f1_df <- tTest_f1_df[!tTest_f1_df$Trt %in% c("Solvent control","Actelic"),]
+
+tTest_f1_df$Group <- as.factor(tTest_f1_df$Group)
+# Comparisons against reference
+f1.stat.test <- compare_means(
+    Inhibition_rate ~ Group, data = tTest_f1_df, group.by = "Trt",
+    method = "t.test"
+)
+
+print_table(f1.stat.test)
+
+tTest_f1_df <- tTest_f1_df %>% mutate(Group = case_when(
+    Group == "Cv" ~ "C. volkensii",
+    Group == "Ss" ~ "S. singueana"
+))
+
+# Plot
+bp <- ggbarplot(tTest_f1_df, x = "Trt", y = "Inhibition_rate",
+                fill = "Group", palette = "jco",
+                add = "mean_sd", add.params = list(group = "Group"),
+                position = position_dodge(0.8),xlab="Extract concentration (g/100ml)",ylab = "Inhibition rate (%)")+
+    
+      geom_bracket(
+        data = f1.stat.test,
+        aes(xmin = Trt, xmax = Trt, 
+            y.position = max(tTest_f1_df$Inhibition_rate)* 1.05 + 2),
+        label = "" ,#paste("p=",f1.stat.test$p.format),
+        bracket_width = 0.5,    # Adjust width of the bracket
+        bracket.shorten = 0.1,  # Control the shortening of the bracket
+        inherit.aes = FALSE  # We don't want to inherit the main aes() from ggplot
+    ) +
+  theme_pubr(
+  base_size = 12,
+  base_family = "",
+  border = FALSE,
+  margin = TRUE,
+  legend = "bottom",
+  x.text.angle = 0
+)+ 
+  stat_pvalue_manual(
+    f1.stat.test, x = "Trt", y.position = 94,
+    label = "p.signif",
+    position = position_dodge(0.8)
+)
+
+
+bp <- bp +theme(
+        panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.background = element_blank(),
+        panel.grid.minor = element_blank(),
+        legend.text = element_text(face = "italic"),
+        axis.line = element_line(),
+        legend.title = element_blank(),
+        legend.key.size = unit(.35, 'cm'),
+        legend.position = "bottom"
+    )
+
+
+ggpar(bp, legend.title = "")
+
+
+```
+
+
+# Plot of t-test F1 (both) 
+```{r, echo=FALSE}
+tTest_f1_both <- rbind(f1_df_ss,f1_df_cv)
+tTest_f1_both <- tTest_f1_both[!tTest_f1_both$Trt %in% c("Solvent control","Actelic"),]
+print_table(tTest_f1_both)
+
+t_test_results_f1_both <- tTest_f1_both %>%
+    group_by(Trt) %>%
+    summarise(
+        t_test_comparisons = list(
+            combn(unique(Trt), 2, simplify = FALSE) %>%
+                map(~ {
+                    # Perform t-test between two time points
+                    t_test <- t.test(
+                        Inhibition_rate[Trt == .x[1]], 
+                        Inhibition_rate[Trt == .x[2]]
+                    )
+                    # Return a tibble with the comparison, p-value, and statistic
+                    tibble(
+                        Trt1 = .x[1],
+                        Trt2 = .x[2],
+                        p_value = t_test$p.value,
+                        statistic = t_test$statistic
+                    )
+                })
+        )
+    ) %>%
+    unnest(t_test_comparisons)
+
+# View the t-test results
+print_table(t_test_results_f1_both)
+
+
+library(tidyr)
+
+# Assuming you have already performed the t-tests and unnested the results
+# Here's an example based on the previous code:
+
+# Prepare the data for plotting
+# Unnest the t-test results to flatten the list-column into individual rows
+t_test_results_flat_f1_both <- t_test_results_f1_both %>%
+    unnest(t_test_comparisons)
+
+print_table(t_test_results_flat_f1_both)
+
+# Plotting the t-test results
+tt_plot_f1_both <- ggplot(t_test_results_flat_f1_both, aes(x = interaction(Trt1, Trt2), y = p_value, fill = p_value < 0.05)) +
+    #geom_point(size = 4) + # Plot points for each comparison
+    geom_bar(stat = "identity")+
+    theme_minimal() +
+    labs(
+        title = "Pairwise t-test Comparisons between extract conc. (both)",
+        x = "Extract concentration (g/100ml)",
+        y = "p-value",
+        color = "Significant"
+    ) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotate x-axis labels for clarity
+    scale_fill_manual(values = c("#073763", "orange3")) +  # Color points based on significance
+    geom_hline(yintercept = 0.05, linetype = "dashed", color = "black")
+
+
+tt_plot_f1_both
+
+```
+
+
+
+```{r, echo=FALSE}
+
+cat("END")
+
+```
+
